@@ -1,8 +1,7 @@
 """ORCA Language Server Protocol implementation"""
 
-import asyncio
 import re
-from typing import List, Optional, Any
+from typing import List, Optional
 
 from pygls.server import LanguageServer
 from lsprotocol.types import (
@@ -24,7 +23,6 @@ from lsprotocol.types import (
     CodeAction,
     CodeActionKind,
     CodeActionParams,
-    Command,
     WorkspaceEdit,
 )
 
