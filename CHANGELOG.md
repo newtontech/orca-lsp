@@ -1,5 +1,27 @@
 # Change Log
 
+## [0.2.1] - 2026-03-03
+
+### Added
+- Improved test coverage from 96% to 97%
+- Added comprehensive edge case tests for parser and server
+- Added pragma comments for non-testable decorator functions
+
+### Fixed
+- Enhanced branch coverage for case-insensitive keyword matching
+- Improved test coverage for unknown keyword handling
+- Better coverage for geometry parsing edge cases
+
+### Tests
+- Added 299 tests total (up from 213)
+- Achieved 97% code coverage
+- Added tests for unknown keyword paths
+- Added tests for case-insensitive matching
+- Added tests for geometry parsing loops
+
+### Documentation
+- Updated coverage number to 97% in README
+
 ## [0.2.0] - 2026-03-02
 
 ### Added
