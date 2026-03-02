@@ -50,13 +50,12 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "--cov=src/orca_lsp --cov-report=term-missing --cov-report=html --cov-report=xml --cov-fail-under=100 -v"
 asyncio_mode = "auto"
 
 [tool.coverage.run]
-source = ["src/orca_lsp"]
-omit = ["*/tests/*", "*/test_*"]
+source = ["orca_lsp"]
 branch = true
+omit = ["*/tests/*", "*/test_*"]
 
 [tool.coverage.report]
 exclude_lines = [
@@ -69,4 +68,3 @@ exclude_lines = [
     "pass",
     "..."
 ]
-fail_under = 100

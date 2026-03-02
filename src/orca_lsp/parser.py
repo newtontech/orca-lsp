@@ -20,6 +20,7 @@ class SimpleInput:
     job_types: List[str] = field(default_factory=list)
     other_keywords: List[str] = field(default_factory=list)
     raw: str = ""
+    line_number: int = 0
     
     def is_valid(self) -> bool:
         """Check if simple input has required components"""
@@ -188,14 +189,29 @@ class ORCAParser:
         else:
             return None, start_line
         
-        # Check if block is on single line
-        if 'end' in first_line.lower() or first_line.lower().endswith('end'):
+        # Check if block contains 'end' on the same line
+        if ' end' in first_line.lower() or first_line.lower().endswith('end'):
             block.raw_content = first_line
+            block.line_end = start_line
             # Parse parameters from single line
             self._parse_block_parameters(block, first_line)
             return block, start_line
         
-        # Multi-line block
+        # Check if this is a single-line assignment (e.g., %maxcore 4000)
+        # These don't have 'end' and are complete on one line
+        parts = first_line.split()
+        if len(parts) == 2 and not parts[1].lower() == 'end':
+            try:
+                # Try to parse as a value
+                int(parts[1])
+                block.raw_content = first_line
+                block.line_end = start_line
+                self._parse_block_parameters(block, first_line)
+                return block, start_line
+            except ValueError:
+                pass
+        
+        # Multi-line block - look for 'end'
         content_lines = [first_line]
         i = start_line + 1
         
@@ -203,17 +219,22 @@ class ORCAParser:
             line = lines[i]
             content_lines.append(line)
             
-            if line.strip().lower() == 'end':
+            stripped = line.strip().lower()
+            if stripped == 'end' or stripped.endswith(' end'):
+                block.line_end = i
                 break
             i += 1
+        else:
+            # No 'end' found, treat as single line
+            block.line_end = start_line
+            content_lines = [first_line]
         
         block.raw_content = '\n'.join(content_lines)
-        block.line_end = i
         
         # Parse block-specific parameters
         self._parse_block_parameters(block, block.raw_content)
         
-        return block, i
+        return block, block.line_end
     
     def _parse_block_parameters(self, block: PercentBlock, content: str):
         """Parse parameters for a % block"""

@@ -49,12 +49,25 @@ class ORCALanguageServer(LanguageServer):
     
     def _setup_features(self):
         """Setup LSP features"""
-        self.feature("textDocument/completion")(self._on_completion)
-        self.feature("textDocument/hover")(self._on_hover)
-        self.feature("textDocument/diagnostic")(self._on_diagnostic)
-        self.feature("textDocument/codeAction")(self._on_code_action)
-        self.feature("textDocument/didOpen")(self._on_did_open)
-        self.feature("textDocument/didChange")(self._on_did_change)
+        @self.feature("textDocument/completion")
+        def on_completion(params: CompletionParams) -> Optional[CompletionList]:
+            return self._on_completion(params)
+        
+        @self.feature("textDocument/hover")
+        def on_hover(params: HoverParams) -> Optional[Hover]:
+            return self._on_hover(params)
+        
+        @self.feature("textDocument/codeAction")
+        def on_code_action(params: CodeActionParams) -> List[CodeAction]:
+            return self._on_code_action(params)
+        
+        @self.feature("textDocument/didOpen")
+        def on_did_open(params: DidOpenTextDocumentParams):
+            self._on_did_open(params)
+        
+        @self.feature("textDocument/didChange")
+        def on_did_change(params: DidChangeTextDocumentParams):
+            self._on_did_change(params)
     
     def _on_completion(self, params: CompletionParams) -> Optional[CompletionList]:
         """Handle completion requests"""
@@ -281,11 +294,6 @@ class ORCALanguageServer(LanguageServer):
             end += 1
         
         return line[start:end]
-    
-    def _on_diagnostic(self, params) -> List[Diagnostic]:
-        """Handle diagnostic requests"""
-        # Diagnostics are handled via didOpen/didChange
-        return []
     
     def _validate_document(self, uri: str):
         """Validate a document and publish diagnostics"""
