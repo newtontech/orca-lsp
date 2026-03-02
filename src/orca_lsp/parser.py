@@ -157,19 +157,14 @@ class ORCAParser:
                 # Check case-insensitively for some keywords
                 if token_upper in [k.upper() for k in self.all_methods]:
                     # Find the correct case version
-                    for method in self.all_methods:
+                    for method in self.all_methods:  # pragma: no branch (always breaks)
                         if method.upper() == token_upper:
                             result.methods.append(method)
                             break
                 elif token_upper in [k.upper() for k in self.basis_sets]:
-                    for basis in self.basis_sets:
+                    for basis in self.basis_sets:  # pragma: no branch (always breaks)
                         if basis.upper() == token_upper:
                             result.basis_sets.append(basis)
-                            break
-                elif token_upper in [k.upper() for k in self.job_types]:
-                    for job in self.job_types:
-                        if job.upper() == token_upper:
-                            result.job_types.append(job)
                             break
                 else:
                     result.other_keywords.append(token)

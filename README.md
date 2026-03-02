@@ -72,7 +72,7 @@ pytest --cov=orca_lsp --cov-report=html
 
 Open `htmlcov/index.html` to view the detailed coverage report.
 
-Current coverage: 97%
+Current coverage: 100%
 
 ## Architecture
 

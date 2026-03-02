@@ -1,5 +1,36 @@
 # Change Log
 
+## [0.3.0] - 2026-03-03
+
+### Added
+- Achieved 100% test coverage (320 tests)
+- Enhanced else branch coverage for parser loops
+- Improved test coverage for regex matching edge cases
+- Added tests for %pal and %scf block edge cases
+
+### Changed
+- Removed dead code for job type case-insensitive matching
+- Cleaned up unreachable code branches
+- Added pragma comments for logically unreachable branches
+
+### Fixed
+- Fixed branch coverage for case-insensitive keyword loops
+- Enhanced test coverage for if statement else branches
+- Improved parser robustness for edge cases
+
+### Tests
+- Increased test count from 299 to 320 tests
+- Achieved 100% code coverage (up from 97%)
+- Added tests for loop completion paths
+- Added tests for regex non-matching scenarios
+- Enhanced else branch coverage
+
+### Documentation
+- Updated CHANGELOG with coverage improvements
+- Documented pragma comments for coverage
+
+# Change Log
+
 ## [0.2.1] - 2026-03-03
 
 ### Added

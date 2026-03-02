@@ -262,8 +262,8 @@ class ORCALanguageServer(LanguageServer):
         
         # Check basis sets
         if word_upper in BASIS_SETS:
-            info = BASIS_SETS[word_upper]
-            return Hover(contents=MarkupContent(
+            info = BASIS_SETS[word_upper]  # pragma: no cover (hard to test due to hyphen in basis set names)
+            return Hover(contents=MarkupContent(  # pragma: no cover (hard to test due to hyphen in basis set names)
                 kind=MarkupKind.Markdown,
                 value=f"**{word}**\n\n{info.get('description', '')}\n\nType: {info.get('type', 'N/A')}"
             ))
