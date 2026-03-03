@@ -78,9 +78,9 @@ class TestParserGeometryEdgeCases:
             "* xyz 0 1",
             "H 0.0 0.0 0.0",
         ]  # No '*' at end, file ends
-        
+
         geom, end_line = parser.parse_geometry(lines, 0)
-        
+
         # Should still return geometry
         assert geom is not None
         # line_end may be 0 or parsed value
@@ -110,7 +110,7 @@ class TestParserPercentBlockEdgeCases:
         """Test single-line block with non-numeric second part."""
         lines = ["%maxcore notanumber"]
         block, end_line = parser.parse_percent_block(lines, 0)
-        
+
         assert block is not None
         assert block.name == "maxcore"
         # Should not set memory parameter due to ValueError
@@ -152,7 +152,7 @@ class TestServerFeatureFunctions:
 
         result = server._on_hover(params)
         # May return None if word not found, or Hover
-        assert result is None or hasattr(result, 'contents')
+        assert result is None or hasattr(result, "contents")
 
     def test_feature_code_action_returns_value(self, server):
         """Test that code action feature returns proper value."""

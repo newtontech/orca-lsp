@@ -3,7 +3,6 @@ Basic tests for orca-lsp
 """
 
 
-
 def test_import():
     """Test that the package can be imported"""
     assert True

@@ -21,7 +21,7 @@ class TestParserMissingCoverage:
 
     def test_case_insensitive_method_with_correct_case_in_list(self, parser):
         """Test case-insensitive lookup when method is found in all_methods.
-        
+
         This covers lines 160->145: the break after finding the correct case method.
         """
         # Use a method that exists but with different case
@@ -34,7 +34,7 @@ class TestParserMissingCoverage:
 
     def test_case_insensitive_basis_with_correct_case_in_list(self, parser):
         """Test case-insensitive lookup when basis is found in basis_sets.
-        
+
         This covers lines 165->145: the break after finding the correct case basis.
         """
         # Use a basis set that exists but with different case
@@ -44,7 +44,7 @@ class TestParserMissingCoverage:
 
     def test_unknown_keyword_other_keywords_append(self, parser):
         """Test that unknown keywords go to other_keywords.
-        
+
         This covers lines 170-173: the else branch that appends to other_keywords.
         """
         result = parser.parse_simple_input("! TotallyUnknownKeyword12345", 0)
@@ -63,7 +63,7 @@ class TestParserMissingCoverage:
 
     def test_percent_block_single_line_no_end_no_numeric(self, parser):
         """Test single-line block with non-numeric value that fails int().
-        
+
         This covers the except ValueError pass branch around line 258->255.
         """
         lines = ["%maxcore notanumber"]
@@ -75,7 +75,7 @@ class TestParserMissingCoverage:
 
     def test_geometry_no_end_marker_fallback(self, parser):
         """Test geometry parsing when no end marker is found.
-        
+
         This covers the fallback path at line 278->274.
         """
         # Geometry without trailing * and without reaching end of file naturally
@@ -99,7 +99,7 @@ class TestServerMissingCoverage:
 
     def test_hover_unknown_keyword_returns_none(self, server):
         """Test hover on unknown keyword returns None.
-        
+
         This covers lines 265-266: the final return None in _on_hover.
         """
         mock_doc = MagicMock()

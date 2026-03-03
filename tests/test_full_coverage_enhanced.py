@@ -1,4 +1,5 @@
 """Enhanced tests for full coverage."""
+
 import pytest
 from unittest.mock import MagicMock, patch
 from lsprotocol.types import (
@@ -130,13 +131,13 @@ class TestServerDocumentValidation:
     def server(self):
         return ORCALanguageServer()
 
-    @patch('orca_lsp.server.ORCALanguageServer.publish_diagnostics')
+    @patch("orca_lsp.server.ORCALanguageServer.publish_diagnostics")
     def test_validate_and_publish_empty(self, mock_publish, server):
         """Test validation of empty document."""
         server._validate_document("test://empty.inp")
         assert mock_publish.called
 
-    @patch('orca_lsp.server.ORCALanguageServer.publish_diagnostics')
+    @patch("orca_lsp.server.ORCALanguageServer.publish_diagnostics")
     def test_validate_and_publish_with_errors(self, mock_publish, server):
         """Test validation with errors."""
         server._validate_document("test://with_errors.inp")
@@ -154,13 +155,13 @@ class TestServerDiagnostics:
         """Test parser result with errors."""
         result = server.parser.parse("! INVALID")
         assert len(result.errors) > 0
-        assert any('method' in e.get('message', '').lower() for e in result.errors)
+        assert any("method" in e.get("message", "").lower() for e in result.errors)
 
     def test_parse_result_with_warnings(self, server):
         """Test parser result with warnings."""
         result = server.parser.parse("! B3LYP def2-SVP\n* xyz 0 1\nH 0 0 0\n*")
         assert len(result.warnings) > 0
-        assert any('maxcore' in w.get('message', '').lower() for w in result.warnings)
+        assert any("maxcore" in w.get("message", "").lower() for w in result.warnings)
 
 
 class TestCodeActions:
@@ -174,11 +175,8 @@ class TestCodeActions:
         """Test code action with no diagnostics."""
         params = CodeActionParams(
             text_document=TextDocumentIdentifier(uri="test"),
-            range=Range(
-                start=Position(line=0, character=0),
-                end=Position(line=0, character=0)
-            ),
-            context=MagicMock(diagnostics=[])
+            range=Range(start=Position(line=0, character=0), end=Position(line=0, character=0)),
+            context=MagicMock(diagnostics=[]),
         )
         actions = server._on_code_action(params)
         assert isinstance(actions, list)
@@ -189,11 +187,8 @@ class TestCodeActions:
         mock_diagnostic.message = "Some other error"
         params = CodeActionParams(
             text_document=TextDocumentIdentifier(uri="test"),
-            range=Range(
-                start=Position(line=0, character=0),
-                end=Position(line=0, character=0)
-            ),
-            context=MagicMock(diagnostics=[mock_diagnostic])
+            range=Range(start=Position(line=0, character=0), end=Position(line=0, character=0)),
+            context=MagicMock(diagnostics=[mock_diagnostic]),
         )
         actions = server._on_code_action(params)
         assert isinstance(actions, list)
@@ -206,7 +201,7 @@ class TestDocumentEventsIntegration:
     def server(self):
         return ORCALanguageServer()
 
-    @patch('orca_lsp.server.ORCALanguageServer.publish_diagnostics')
+    @patch("orca_lsp.server.ORCALanguageServer.publish_diagnostics")
     def test_did_open_calls_validation(self, mock_publish, server):
         """Test that didOpen calls validation."""
         params = DidOpenTextDocumentParams(
@@ -214,21 +209,18 @@ class TestDocumentEventsIntegration:
                 uri="test://open.inp",
                 language_id="orca",
                 version=1,
-                text="! B3LYP def2-SVP\n* xyz 0 1\nH 0 0 0\n*"
+                text="! B3LYP def2-SVP\n* xyz 0 1\nH 0 0 0\n*",
             )
         )
         server._on_did_open(params)
         assert mock_publish.called
 
-    @patch('orca_lsp.server.ORCALanguageServer.publish_diagnostics')
+    @patch("orca_lsp.server.ORCALanguageServer.publish_diagnostics")
     def test_did_change_calls_validation(self, mock_publish, server):
         """Test that didChange calls validation."""
         params = DidChangeTextDocumentParams(
-            text_document=VersionedTextDocumentIdentifier(
-                uri="test://change.inp",
-                version=2
-            ),
-            content_changes=[]
+            text_document=VersionedTextDocumentIdentifier(uri="test://change.inp", version=2),
+            content_changes=[],
         )
         server._on_did_change(params)
         assert mock_publish.called

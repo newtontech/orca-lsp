@@ -1,4 +1,5 @@
 """Tests for ORCA LSP server."""
+
 import pytest
 from unittest.mock import MagicMock, patch
 from lsprotocol.types import (
@@ -53,18 +54,18 @@ class TestCompletions:
         completions = server._get_element_completions()
         assert isinstance(completions, list)
         assert len(completions) > 0
-    
+
     def test_get_completions_simple_input(self, server):
         """Test completions for simple input line."""
         completions = server._get_completions("! ", Position(line=0, character=2))
         assert isinstance(completions, list)
         assert len(completions) > 0
-    
+
     def test_get_completions_percent_block(self, server):
         """Test completions for percent block."""
         completions = server._get_completions("%max", Position(line=0, character=4))
         assert isinstance(completions, list)
-    
+
     def test_get_completions_geometry(self, server):
         """Test completions in geometry section."""
         completions = server._get_completions("O 0.0 0.0 ", Position(line=0, character=10))
@@ -82,7 +83,7 @@ class TestHover:
         """Test hover on DFT functional."""
         mock_doc = MagicMock()
         mock_doc.lines = ["! B3LYP def2-TZVP"]
-        
+
         word = server._get_word_at_position(mock_doc, Position(line=0, character=4))
         assert word == "B3LYP"
 
@@ -90,7 +91,7 @@ class TestHover:
         """Test hover on basis set."""
         mock_doc = MagicMock()
         mock_doc.lines = ["! B3LYP def2-TZVP"]
-        
+
         word = server._get_word_at_position(mock_doc, Position(line=0, character=12))
         assert word == "def2"
 
@@ -147,8 +148,10 @@ class TestCodeActions:
         """Test code action logic for maxcore."""
         # Test the logic directly without workspace
         mock_diagnostic = MagicMock()
-        mock_diagnostic.message = "Missing %maxcore setting. Recommended: %maxcore 2000-4000 (MB per core)"
-        
+        mock_diagnostic.message = (
+            "Missing %maxcore setting. Recommended: %maxcore 2000-4000 (MB per core)"
+        )
+
         # Verify the condition check
         assert "Missing %maxcore" in mock_diagnostic.message
 
@@ -176,7 +179,7 @@ class TestDocumentEvents:
 class TestMain:
     """Test main entry point."""
 
-    @patch('orca_lsp.server.ORCALanguageServer')
+    @patch("orca_lsp.server.ORCALanguageServer")
     def test_main(self, mock_server_class):
         """Test main function."""
         mock_server = MagicMock()
@@ -233,7 +236,7 @@ Xx 0 0 0
 """
         result = server.parser.parse(content)
         # Should have error for invalid element
-        assert any('Invalid element' in e.get('message', '') for e in result.errors)
+        assert any("Invalid element" in e.get("message", "") for e in result.errors)
 
 
 class TestKeywordLookup:
@@ -246,17 +249,20 @@ class TestKeywordLookup:
     def test_dft_functional_lookup(self, server):
         """Test DFT functional documentation lookup."""
         from orca_lsp.keywords import DFT_FUNCTIONALS
+
         assert "B3LYP" in DFT_FUNCTIONALS
         assert "description" in DFT_FUNCTIONALS["B3LYP"]
 
     def test_basis_set_lookup(self, server):
         """Test basis set documentation lookup."""
         from orca_lsp.keywords import BASIS_SETS
+
         assert "def2-TZVP" in BASIS_SETS
         assert "description" in BASIS_SETS["def2-TZVP"]
 
     def test_job_type_lookup(self, server):
         """Test job type documentation lookup."""
         from orca_lsp.keywords import JOB_TYPES
+
         assert "OPT" in JOB_TYPES
         assert "FREQ" in JOB_TYPES

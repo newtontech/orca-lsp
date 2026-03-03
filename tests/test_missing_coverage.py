@@ -62,7 +62,7 @@ class TestServerBasisSetHoverReturn:
         result = server._on_hover(params)
         # def2 is not a complete keyword, try def2-SVP
         if result is not None:
-            assert hasattr(result, 'contents')
+            assert hasattr(result, "contents")
 
     def test_hover_known_basis_set(self, server):
         """Test hover on known basis set."""
@@ -78,7 +78,7 @@ class TestServerBasisSetHoverReturn:
         result = server._on_hover(params)
         # SVP might not be in BASIS_SETS directly
         if result is not None:
-            assert hasattr(result, 'contents')
+            assert hasattr(result, "contents")
 
 
 class TestParserGeometryBranches:

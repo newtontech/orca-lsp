@@ -1,21 +1,22 @@
 """Tests to improve parser coverage."""
+
 import pytest
 from orca_lsp.parser import ORCAParser, SimpleInput, PercentBlock, Atom, Geometry
 
 
 class TestSimpleInput:
     """Test SimpleInput dataclass."""
-    
+
     def test_is_valid_with_methods(self):
         """Test is_valid returns True when methods present."""
         si = SimpleInput(methods=["B3LYP"])
         assert si.is_valid() is True
-    
+
     def test_is_valid_with_basis_sets(self):
         """Test is_valid returns True when basis sets present."""
         si = SimpleInput(basis_sets=["def2-TZVP"])
         assert si.is_valid() is True
-    
+
     def test_is_valid_empty(self):
         """Test is_valid returns False when empty."""
         si = SimpleInput()
@@ -24,12 +25,12 @@ class TestSimpleInput:
 
 class TestPercentBlock:
     """Test PercentBlock dataclass."""
-    
+
     def test_is_valid_with_name(self):
         """Test is_valid returns True when name present."""
         pb = PercentBlock(name="maxcore")
         assert pb.is_valid() is True
-    
+
     def test_is_valid_empty(self):
         """Test is_valid returns False when empty."""
         pb = PercentBlock()
@@ -38,12 +39,12 @@ class TestPercentBlock:
 
 class TestAtom:
     """Test Atom dataclass."""
-    
+
     def test_is_valid_element(self):
         """Test is_valid returns True for valid element."""
         atom = Atom(element="C", x=0.0, y=0.0, z=0.0)
         assert atom.is_valid() is True
-    
+
     def test_is_invalid_element(self):
         """Test is_valid returns False for invalid element."""
         atom = Atom(element="Xx", x=0.0, y=0.0, z=0.0)
@@ -52,18 +53,18 @@ class TestAtom:
 
 class TestGeometry:
     """Test Geometry dataclass."""
-    
+
     def test_is_valid_with_atoms(self):
         """Test is_valid returns True with valid atoms."""
         geom = Geometry()
         geom.atoms = [Atom(element="H", x=0, y=0, z=0)]
         assert geom.is_valid() is True
-    
+
     def test_is_invalid_empty(self):
         """Test is_valid returns False when empty."""
         geom = Geometry()
         assert geom.is_valid() is False
-    
+
     def test_is_invalid_with_invalid_atom(self):
         """Test is_valid returns False with invalid atom."""
         geom = Geometry()
@@ -113,7 +114,7 @@ end
 H 0 0 0
 *"""
         result = parser.parse(content)
-        assert any(b.name == 'scf' for b in result.percent_blocks)
+        assert any(b.name == "scf" for b in result.percent_blocks)
 
     def test_parse_method_block_d3bj(self, parser):
         """Test parsing %method block with D3BJ."""
@@ -126,9 +127,9 @@ end
 H 0 0 0
 *"""
         result = parser.parse(content)
-        method_block = next((b for b in result.percent_blocks if b.name == 'method'), None)
+        method_block = next((b for b in result.percent_blocks if b.name == "method"), None)
         if method_block:
-            assert method_block.parameters.get('dispersion') == 'D3BJ'
+            assert method_block.parameters.get("dispersion") == "D3BJ"
 
     def test_parse_method_block_d4(self, parser):
         """Test parsing %method block with D4."""
@@ -141,9 +142,9 @@ end
 H 0 0 0
 *"""
         result = parser.parse(content)
-        method_block = next((b for b in result.percent_blocks if b.name == 'method'), None)
+        method_block = next((b for b in result.percent_blocks if b.name == "method"), None)
         if method_block:
-            assert method_block.parameters.get('dispersion') == 'D4'
+            assert method_block.parameters.get("dispersion") == "D4"
 
     def test_parse_invalid_percent_block(self, parser):
         """Test parsing invalid % block."""
@@ -185,38 +186,38 @@ H 0 0 0
         """Test diagnostics for missing basis set."""
         content = "! B3LYP\n* xyz 0 1\nH 0 0 0\n*"
         result = parser.parse(content)
-        assert any('basis set' in e.get('message', '').lower() for e in result.errors)
+        assert any("basis set" in e.get("message", "").lower() for e in result.errors)
 
     def test_parse_missing_method(self, parser):
         """Test diagnostics for missing method."""
         content = "! def2-SVP\n* xyz 0 1\nH 0 0 0\n*"
         result = parser.parse(content)
-        assert any('method' in e.get('message', '').lower() for e in result.errors)
+        assert any("method" in e.get("message", "").lower() for e in result.errors)
 
     def test_parse_with_maxcore_warning(self, parser):
         """Test warning for missing maxcore."""
         content = "! B3LYP def2-SVP\n* xyz 0 1\nH 0 0 0\n*"
         result = parser.parse(content)
-        assert any('maxcore' in w.get('message', '').lower() for w in result.warnings)
+        assert any("maxcore" in w.get("message", "").lower() for w in result.warnings)
 
     def test_parse_percent_block_single_line_with_end(self, parser):
         """Test single line % block with end."""
         content = "! B3LYP def2-SVP\n%pal nprocs 4 end\n* xyz 0 1\nH 0 0 0\n*"
         result = parser.parse(content)
-        pal_block = next((b for b in result.percent_blocks if b.name == 'pal'), None)
+        pal_block = next((b for b in result.percent_blocks if b.name == "pal"), None)
         assert pal_block is not None
-        assert pal_block.parameters.get('nprocs') == 4
+        assert pal_block.parameters.get("nprocs") == 4
 
     def test_parse_wavefunction_methods(self, parser):
         """Test parsing wavefunction methods."""
-        for method in ['HF', 'MP2', 'CCSD', 'CCSD(T)']:
+        for method in ["HF", "MP2", "CCSD", "CCSD(T)"]:
             content = f"! {method} cc-pVTZ\n* xyz 0 1\nH 0 0 0\n*"
             result = parser.parse(content)
             assert any(method in m for m in result.simple_input.methods), f"Failed for {method}"
 
     def test_parse_job_types(self, parser):
         """Test parsing job types."""
-        for job in ['SP', 'OPT', 'FREQ']:
+        for job in ["SP", "OPT", "FREQ"]:
             content = f"! B3LYP def2-SVP {job}\n* xyz 0 1\nH 0 0 0\n*"
             result = parser.parse(content)
             assert any(job in j for j in result.simple_input.job_types), f"Failed for {job}"

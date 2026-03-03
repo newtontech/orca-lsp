@@ -21,36 +21,36 @@ class TestParserLoopCoverage:
 
     def test_case_insensitive_method_break_and_normal_exit(self, parser):
         """Test both break and normal exit in method loop.
-        
+
         Line 160: for method in self.all_methods:
         We need to ensure:
         1. break is executed when matching method is found
         2. Loop can also run normally when no match found
         """
         # Test with mixed case method that triggers break
-        result1 = parser.parse_simple_input('! REVPBE', 0)
+        result1 = parser.parse_simple_input("! REVPBE", 0)
         assert len(result1.methods) == 1
-        assert 'revPBE' in result1.methods
+        assert "revPBE" in result1.methods
 
         # Test with unknown method that loops through all
-        result2 = parser.parse_simple_input('! UNKNOWN_METHOD_12345', 0)
+        result2 = parser.parse_simple_input("! UNKNOWN_METHOD_12345", 0)
         assert len(result2.methods) == 0
-        assert 'UNKNOWN_METHOD_12345' in result2.other_keywords
+        assert "UNKNOWN_METHOD_12345" in result2.other_keywords
 
     def test_case_insensitive_basis_break_and_normal_exit(self, parser):
         """Test both break and normal exit in basis loop.
-        
+
         Line 165: for basis in self.basis_sets:
         """
         # Test with mixed case basis that triggers break
-        result1 = parser.parse_simple_input('! DEF2-TZVP', 0)
+        result1 = parser.parse_simple_input("! DEF2-TZVP", 0)
         assert len(result1.basis_sets) == 1
-        assert 'def2-TZVP' in result1.basis_sets
+        assert "def2-TZVP" in result1.basis_sets
 
         # Test with unknown basis that loops through all
-        result2 = parser.parse_simple_input('! UNKNOWN_BASIS_XYZ', 0)
+        result2 = parser.parse_simple_input("! UNKNOWN_BASIS_XYZ", 0)
         assert len(result2.basis_sets) == 0
-        assert 'UNKNOWN_BASIS_XYZ' in result2.other_keywords
+        assert "UNKNOWN_BASIS_XYZ" in result2.other_keywords
 
 
 class TestParserElseBranches:
@@ -62,7 +62,7 @@ class TestParserElseBranches:
 
     def test_pal_block_without_nprocs(self, parser):
         """Test %pal block without nprocs.
-        
+
         Line 253->250: else branch in pal block parsing.
         """
         content = """! B3LYP def2-SVP
@@ -73,14 +73,14 @@ H 0 0 0
 *
 """
         result = parser.parse(content)
-        pal_block = next((b for b in result.percent_blocks if b.name == 'pal'), None)
+        pal_block = next((b for b in result.percent_blocks if b.name == "pal"), None)
         assert pal_block is not None
         # Should not have nprocs parameter
-        assert 'nprocs' not in pal_block.parameters
+        assert "nprocs" not in pal_block.parameters
 
     def test_scf_block_without_maxiter(self, parser):
         """Test %scf block without maxiter.
-        
+
         Line 273->269: else branch in scf block parsing.
         """
         content = """! B3LYP def2-SVP
@@ -91,10 +91,10 @@ H 0 0 0
 *
 """
         result = parser.parse(content)
-        scf_block = next((b for b in result.percent_blocks if b.name == 'scf'), None)
+        scf_block = next((b for b in result.percent_blocks if b.name == "scf"), None)
         assert scf_block is not None
         # Should not have maxiter parameter
-        assert 'maxiter' not in scf_block.parameters
+        assert "maxiter" not in scf_block.parameters
 
 
 class TestServerHoverCoverage:
@@ -106,7 +106,7 @@ class TestServerHoverCoverage:
 
     def test_hover_basis_set(self, server):
         """Test hover on basis set keyword.
-        
+
         Lines 265-266: basis set hover return statement.
         """
         mock_doc = MagicMock()
@@ -131,7 +131,7 @@ class TestServerHoverCoverage:
 
     def test_hover_job_type(self, server):
         """Test hover on job type keyword.
-        
+
         Lines 273-274: job type hover return statement.
         """
         mock_doc = MagicMock()

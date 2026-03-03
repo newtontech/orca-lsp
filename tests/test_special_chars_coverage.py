@@ -58,7 +58,7 @@ class TestParserLines170to173Coverage:
         # 1. Fail direct check (ΩB97X-V not in dft_functionals)
         # 2. Pass case-insensitive check (ωB97X-V.upper() == ΩB97X-V)
         result = parser.parse_simple_input("! ωB97X-V def2-SVP", 0)
-        
+
         # Method should be found via case-insensitive lookup
         assert any("ωB97X-V" in m or "ΩB97X-V" in m for m in result.methods)
         assert len(result.basis_sets) > 0

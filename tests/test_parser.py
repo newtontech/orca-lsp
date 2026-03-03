@@ -16,8 +16,8 @@ class TestORCAParser:
         parser = ORCAParser()
         result = parser.parse("")
         assert result is not None
-        assert hasattr(result, 'errors')
-        assert hasattr(result, 'warnings')
+        assert hasattr(result, "errors")
+        assert hasattr(result, "warnings")
 
     def test_parse_simple(self):
         """Test parsing simple input."""

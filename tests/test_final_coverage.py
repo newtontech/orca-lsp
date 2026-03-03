@@ -1,4 +1,5 @@
 """Tests to reach 100% coverage."""
+
 import pytest
 from orca_lsp.parser import ORCAParser, ParseResult
 
@@ -33,9 +34,9 @@ end
 H 0 0 0
 *"""
         result = parser.parse(content)
-        scf_block = next((b for b in result.percent_blocks if b.name == 'scf'), None)
+        scf_block = next((b for b in result.percent_blocks if b.name == "scf"), None)
         if scf_block:
-            assert scf_block.parameters.get('maxiter') == 50
+            assert scf_block.parameters.get("maxiter") == 50
 
     def test_parse_percent_block_with_whitespace(self, parser):
         """Test parsing % block with various whitespace."""
@@ -90,25 +91,25 @@ H 0 0 0
         """Test parsing OPT FREQ job type combination."""
         content = "! B3LYP def2-SVP OPT FREQ\n* xyz 0 1\nH 0 0 0\n*"
         result = parser.parse(content)
-        assert 'OPT' in result.simple_input.job_types
-        assert 'FREQ' in result.simple_input.job_types
+        assert "OPT" in result.simple_input.job_types
+        assert "FREQ" in result.simple_input.job_types
 
     def test_parse_method_block_single_line(self, parser):
         """Test parsing %method block on single line."""
         content = "! B3LYP def2-SVP\n%method d3 end\n* xyz 0 1\nH 0 0 0\n*"
         result = parser.parse(content)
-        method_block = next((b for b in result.percent_blocks if b.name == 'method'), None)
+        method_block = next((b for b in result.percent_blocks if b.name == "method"), None)
         if method_block:
-            assert 'dispersion' in method_block.parameters
+            assert "dispersion" in method_block.parameters
 
     def test_parse_pal_block_without_nprocs(self, parser):
         """Test parsing %pal block without nprocs."""
         content = "! B3LYP def2-SVP\n%pal end\n* xyz 0 1\nH 0 0 0\n*"
         result = parser.parse(content)
-        pal_block = next((b for b in result.percent_blocks if b.name == 'pal'), None)
+        pal_block = next((b for b in result.percent_blocks if b.name == "pal"), None)
         if pal_block:
             # nprocs should not be set
-            assert 'nprocs' not in pal_block.parameters
+            assert "nprocs" not in pal_block.parameters
 
     def test_atom_line_with_extra_fields(self, parser):
         """Test parsing atom line with extra fields."""
@@ -127,8 +128,19 @@ H 0 0 0
 
     def test_parse_wavefunction_variations(self, parser):
         """Test parsing various wavefunction methods."""
-        methods = ['RHF', 'UHF', 'ROHF', 'RI-MP2', 'SCS-MP2', 'MP3', 
-                   'DLPNO-CCSD', 'DLPNO-CCSD(T)', 'CASSCF', 'NEVPT2', 'CASPT2']
+        methods = [
+            "RHF",
+            "UHF",
+            "ROHF",
+            "RI-MP2",
+            "SCS-MP2",
+            "MP3",
+            "DLPNO-CCSD",
+            "DLPNO-CCSD(T)",
+            "CASSCF",
+            "NEVPT2",
+            "CASPT2",
+        ]
         for method in methods:
             content = f"! {method} cc-pVDZ\n* xyz 0 1\nH 0 0 0\n*"
             result = parser.parse(content)
@@ -136,8 +148,18 @@ H 0 0 0
 
     def test_parse_dft_functional_variations(self, parser):
         """Test parsing various DFT functionals."""
-        functionals = ['PBE0', 'TPSS0', 'M06-2X', 'M06L', 'M06-HF',
-                       'ωB97X-D', 'ωB97X-V', 'B97-D', 'B97-D3', 'B2PLYP']
+        functionals = [
+            "PBE0",
+            "TPSS0",
+            "M06-2X",
+            "M06L",
+            "M06-HF",
+            "ωB97X-D",
+            "ωB97X-V",
+            "B97-D",
+            "B97-D3",
+            "B2PLYP",
+        ]
         for func in functionals:
             content = f"! {func} def2-SVP\n* xyz 0 1\nH 0 0 0\n*"
             result = parser.parse(content)
@@ -145,13 +167,32 @@ H 0 0 0
 
     def test_parse_basis_set_variations(self, parser):
         """Test parsing various basis sets."""
-        basis_sets = ['STO-3G', '3-21G', '6-31G*', '6-31G**', 
-                     '6-31+G*', '6-311G*', '6-311G**', 
-                     '6-311+G*', '6-311++G**',
-                     'def2-SVP', 'def2-TZVPP', 'def2-QZVP', 'def2-SVPD', 'def2-TZVPD',
-                     'cc-pVDZ', 'cc-pVTZ', 'cc-pVQZ', 'cc-pV5Z',
-                     'aug-cc-pVDZ', 'aug-cc-pVTZ', 'aug-cc-pVQZ',
-                     'def2/J', 'def2-TZVP/C', 'def2-QZVP/C']
+        basis_sets = [
+            "STO-3G",
+            "3-21G",
+            "6-31G*",
+            "6-31G**",
+            "6-31+G*",
+            "6-311G*",
+            "6-311G**",
+            "6-311+G*",
+            "6-311++G**",
+            "def2-SVP",
+            "def2-TZVPP",
+            "def2-QZVP",
+            "def2-SVPD",
+            "def2-TZVPD",
+            "cc-pVDZ",
+            "cc-pVTZ",
+            "cc-pVQZ",
+            "cc-pV5Z",
+            "aug-cc-pVDZ",
+            "aug-cc-pVTZ",
+            "aug-cc-pVQZ",
+            "def2/J",
+            "def2-TZVP/C",
+            "def2-QZVP/C",
+        ]
         for basis in basis_sets:
             content = f"! B3LYP {basis}\n* xyz 0 1\nH 0 0 0\n*"
             result = parser.parse(content)
