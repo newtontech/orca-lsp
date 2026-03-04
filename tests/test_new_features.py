@@ -1,7 +1,7 @@
 """Tests for new blocks and keywords"""
 
 from orca_lsp.parser import ORCAParser
-from orca_lsp.keywords import PERCENT_BLOCKS, DFT_FUNCTIONALS, BASIS_SETS
+from orca_lsp.keywords import PERCENT_BLOCKS
 
 
 class TestNewPercentBlocks:
