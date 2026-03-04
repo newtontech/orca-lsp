@@ -162,25 +162,27 @@ BASIS_SETS = {
         "description": "Minimal augmented def2-SVP for DFT",
     },
     "ma-def2-TZVP": {
-        "pc-1": {
-            "type": "polarization-consistent",
-            "description": "Polarization-consistent basis set (double-zeta)",
-        },
-        "pc-2": {
-            "type": "polarization-consistent",
-            "description": "Polarization-consistent basis set (triple-zeta)",
-        },
-        "pc-3": {
-            "type": "polarization-consistent",
-            "description": "Polarization-consistent basis set (quadruple-zeta)",
-        },
-        "aug-pc-1": {"type": "polarization-consistent", "description": "Augmented pc-1 basis set"},
-        "aug-pc-2": {"type": "polarization-consistent", "description": "Augmented pc-2 basis set"},
-        "EPR-II": {"type": "EPR", "description": "EPR basis set for hyperfine coupling"},
-        "EPR-III": {"type": "EPR", "description": "Extended EPR basis set"},
         "type": "large-diffuse",
         "description": "Minimal augmented def2-TZVP for DFT",
     },
+    # Jensen polarization-consistent basis sets
+    "pc-1": {
+        "type": "polarization-consistent",
+        "description": "Polarization-consistent basis set (double-zeta)",
+    },
+    "pc-2": {
+        "type": "polarization-consistent",
+        "description": "Polarization-consistent basis set (triple-zeta)",
+    },
+    "pc-3": {
+        "type": "polarization-consistent",
+        "description": "Polarization-consistent basis set (quadruple-zeta)",
+    },
+    "aug-pc-1": {"type": "polarization-consistent", "description": "Augmented pc-1 basis set"},
+    "aug-pc-2": {"type": "polarization-consistent", "description": "Augmented pc-2 basis set"},
+    # EPR-optimized basis sets
+    "EPR-II": {"type": "EPR", "description": "EPR basis set for hyperfine coupling"},
+    "EPR-III": {"type": "EPR", "description": "Extended EPR basis set"},
 }
 
 # Job types

@@ -1,5 +1,14 @@
 # Change Log
 
+## [0.5.1] - 2026-03-04
+
+### Fixed
+- Fixed BASIS_SETS dictionary structure (nested pc basis sets were incorrectly nested under ma-def2-TZVP)
+
+### Changed
+- Properly flattened BASIS_SETS to include all 38 basis sets as top-level entries
+- Basis set count increased from 30 to 38 (added pc-1, pc-2, pc-3, aug-pc-1, aug-pc-2, EPR-II, EPR-III)
+
 ## [0.5.0] - 2026-03-04
 
 ### Added
