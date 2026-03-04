@@ -1,3 +1,51 @@
+## 2026-03-04 (Cron: Development Session) - v0.5.0 Release
+
+### GitHub Status Check
+- **Issues**: 0 open issues
+- **Pull Requests**: 0 open PRs
+
+### Development Summary
+
+#### New Features Added
+1. **Advanced % Blocks** (4 new blocks):
+   - %eprnmr - EPR and NMR property calculations
+   - %moinp - MO input from previous calculation
+   - %rirpa - RI-RPA and GW calculations
+   - %output - Output file settings
+
+2. **DFT Functionals Expansion** (5 new functionals):
+   - B3PW91 - Hybrid with PW91 correlation
+   - X3LYP - Extended hybrid functional
+   - O3LYP - Optimized hybrid functional
+   - mPWLYP - Modified Perdew-Wang LYP
+   - BMK - Boese-Martin for kinetics
+
+3. **Basis Sets Expansion** (7 new basis sets):
+   - pc-1, pc-2, pc-3 - Jensen polarization-consistent
+   - aug-pc-1, aug-pc-2 - Augmented variants
+   - EPR-II, EPR-III - EPR-optimized basis sets
+
+#### Code Changes
+- **src/orca_lsp/keywords.py**: Added new keywords
+- **src/orca_lsp/parser.py**: Enhanced % block parameter parsing
+- **tests/test_new_features.py**: New test suite for new features
+
+#### Test Coverage
+- **Total Tests**: 329 tests (up from 320)
+- **Coverage**: 100% maintained
+- **New Tests**: 9 tests for new features
+
+#### Quality Assurance
+- All tests passing
+- Black formatting verified
+- Ruff linting passed
+- Type checking completed
+
+### Repository Status
+
+
+---
+
 ## 2026-03-04 (Cron: 11:23 CST) - Development Session Summary
 
 ### GitHub Status Check
