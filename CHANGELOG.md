@@ -1,4 +1,20 @@
 # Change Log
+# Change Log
+
+## [0.5.4] - 2026-03-05
+
+### Changed
+- Added comprehensive type annotations for mypy compliance
+- Added TYPE_CHECKING import for TextDocument type hints
+- Fixed all mypy errors (13 errors resolved)
+- Code quality: 100% mypy compliance
+
+### Technical
+- Added return type annotations (-> None) to __init__ and methods
+- Fixed _get_word_at_position to use proper TextDocument type
+- All 338 tests pass with 100% coverage
+
+## [0.5.3] - 2026-03-05
 
 ## [0.5.3] - 2026-03-05
 

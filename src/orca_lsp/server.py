@@ -44,7 +44,7 @@ class ORCALanguageServer(LanguageServer):
     """ORCA Language Server"""
 
     def __init__(self) -> None:
-        super().__init__("orca-lsp", "0.5.3")
+        super().__init__("orca-lsp", "0.5.4")
         self.parser = ORCAParser()
         self._setup_features()
 
