@@ -416,3 +416,99 @@ class ORCAParser:
                     "severity": "warning",
                 }
             )
+
+        # Validate mutually exclusive SCF types
+        self._check_scf_conflicts(result)
+
+        # Validate method combinations
+        self._check_method_combinations(result)
+
+        # Validate spin/charge consistency
+        self._check_spin_charge(result)
+
+        # Validate basis set compatibility
+        self._check_basis_compatibility(result)
+
+    def _check_scf_conflicts(self, result: ParseResult) -> None:
+        """Check for mutually exclusive SCF types"""
+        if not result.simple_input:
+            return
+
+        methods = [m.upper() for m in result.simple_input.methods]
+
+        scf_types = {"RHF", "UHF", "ROHF"}
+        found_scf = [m for m in methods if m in scf_types]
+        if len(found_scf) > 1:
+            result.errors.append(
+                {
+                    "message": f"Mutually exclusive SCF types: {' '.join(found_scf)}",
+                    "line": result.simple_input.line_number,
+                    "severity": "error",
+                }
+            )
+
+    def _check_method_combinations(self, result: ParseResult) -> None:
+        """Check for invalid method combinations"""
+        if not result.simple_input:
+            return
+
+        methods = [m.upper() for m in result.simple_input.methods]
+
+        has_dft = any(m in {"B3LYP", "PBE0", "PBE", "M06", "TPSS", "HF", "RHF", "UHF"} for m in methods)
+        has_mp2 = "MP2" in methods or "RI-MP2" in methods
+
+        if has_dft and has_mp2:
+            result.warnings.append(
+                {
+                    "message": "DFT combined with MP2 is not standard. Consider double-hybrid functionals (e.g., B2PLYP) for such combinations.",
+                    "line": result.simple_input.line_number,
+                    "severity": "warning",
+                }
+            )
+
+    def _check_spin_charge(self, result: ParseResult) -> None:
+        """Check spin/charge consistency in geometry"""
+        if not result.geometry:
+            return
+
+        multiplicity = result.geometry.multiplicity
+        charge = result.geometry.charge
+
+        if multiplicity < 1:
+            result.errors.append(
+                {
+                    "message": "Multiplicity must be >= 1",
+                    "line": result.geometry.line_start,
+                    "severity": "error",
+                }
+            )
+
+        if charge < 0:
+            result.errors.append(
+                {
+                    "message": "Charge cannot be negative",
+                    "line": result.geometry.line_start,
+                    "severity": "error",
+                }
+            )
+
+    def _check_basis_compatibility(self, result: ParseResult) -> None:
+        """Check basis set compatibility"""
+        if not result.simple_input:
+            return
+
+        basis_sets = result.simple_input.basis_sets
+
+        def2_bases = [b for b in basis_sets if b.upper().startswith("DEF2")]
+        def2_with_diffuse = [b for b in def2_bases if "D" in b.upper()[-2:]]
+
+        if def2_bases and not def2_with_diffuse:
+            for atom in result.geometry.atoms if result.geometry else []:
+                if atom.element in ["F", "CL", "BR", "I"]:
+                    result.warnings.append(
+                        {
+                            "message": f"Heavy halogen {atom.element} detected with def2 basis without diffuse functions. Consider {atom.element}-relevant basis set.",
+                            "line": atom.line_number,
+                            "severity": "warning",
+                        }
+                    )
