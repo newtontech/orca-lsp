@@ -43,6 +43,10 @@ from .parser import ORCAParser
 # Pre-sorted elements for completions (avoid sorting on every request)
 _SORTED_ELEMENTS = tuple(sorted(ELEMENTS))
 
+# Named constants for diagnostic ranges (replaces magic numbers)
+_DIAGNOSTIC_LINE_START_CHARACTER = 0
+_DIAGNOSTIC_LINE_END_CHARACTER = 100
+
 # Regex for extracting %block name from a line (O(1) lookup vs O(n*m) loop)
 _PERCENT_BLOCK_NAME_RE = re.compile(r"%\s*(\w+)", re.IGNORECASE)
 
@@ -314,8 +318,8 @@ class ORCALanguageServer(LanguageServer):
         line = item.get("line", 0)
         return Diagnostic(
             range=Range(
-                start=Position(line=line, character=0),
-                end=Position(line=line, character=100),
+                start=Position(line=line, character=_DIAGNOSTIC_LINE_START_CHARACTER),
+                end=Position(line=line, character=_DIAGNOSTIC_LINE_END_CHARACTER),
             ),
             message=item.get("message", ""),
             severity=severity,

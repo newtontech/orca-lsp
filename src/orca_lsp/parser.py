@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from .keywords import BASIS_SETS, DFT_FUNCTIONALS, ELEMENTS, JOB_TYPES, WAVEFUNCTION_METHODS
+from .validator import ORCAValidator
 
 # Pre-compiled regex patterns for performance (avoid recompilation on every loop)
 _NPROCS_RE = re.compile(r"nprocs\s+(\d+)", re.IGNORECASE)
@@ -101,6 +102,7 @@ class ORCAParser:
         }
         self._basis_sets_by_upper = {name.upper(): name for name in self.basis_sets}
         self._job_types_by_upper = {name.upper(): name for name in self.job_types}
+        self._validator = ORCAValidator()
 
         # Registry mapping block names to parameter handlers (OCP: extensible without modification)
         self._block_handlers: Dict[str, Callable[[PercentBlock, str], None]] = {
@@ -151,8 +153,8 @@ class ORCAParser:
 
             i += 1
 
-        # Run diagnostics
-        self._run_diagnostics(result)
+        # Run diagnostics via separate validator
+        self._validator.validate(result)
 
         return result
 
