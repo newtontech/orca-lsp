@@ -47,9 +47,9 @@ _SORTED_ELEMENTS = tuple(sorted(ELEMENTS))
 class ORCALanguageServer(LanguageServer):
     """ORCA Language Server"""
 
-    def __init__(self) -> None:
+    def __init__(self, parser: Optional[ORCAParser] = None) -> None:
         super().__init__("orca-lsp", __version__)
-        self.parser = ORCAParser()
+        self.parser = parser if parser is not None else ORCAParser()
         self._setup_features()
 
     def _setup_features(self) -> None:
@@ -180,80 +180,66 @@ class ORCALanguageServer(LanguageServer):
 
         return completions
 
+    @staticmethod
+    def _create_completions(
+        items: dict, kind: CompletionItemKind, detail_key: str
+    ) -> List[CompletionItem]:
+        """Create completion items from a keyword dictionary.
+
+        Args:
+            items: Mapping of keyword name to info dict.
+            kind: The CompletionItemKind for all items.
+            detail_key: Key in the info dict for the detail text, or a literal
+                        string used when the info dict has no such key.
+        """
+        completions: List[CompletionItem] = []
+        for name, info in items.items():
+            detail = info.get(detail_key, detail_key)
+            completions.append(
+                CompletionItem(
+                    label=name,
+                    kind=kind,
+                    detail=detail,
+                    documentation=info.get("description", ""),
+                )
+            )
+        return completions
+
     def _get_method_completions(self) -> List[CompletionItem]:
         """Get method completions"""
-        completions: List[CompletionItem] = []
-
-        # DFT functionals
-        for name, info in DFT_FUNCTIONALS.items():
-            completions.append(
-                CompletionItem(
-                    label=name,
-                    kind=CompletionItemKind.Function,
-                    detail=f"DFT: {info.get('type', '')}",
-                    documentation=info.get("description", ""),
-                )
+        completions = self._create_completions(DFT_FUNCTIONALS, CompletionItemKind.Function, "type")
+        # Prefix DFT details for clarity
+        for item in completions:
+            if item.detail:
+                item.detail = f"DFT: {item.detail}"
+        completions.extend(
+            self._create_completions(
+                WAVEFUNCTION_METHODS, CompletionItemKind.Method, "type"
             )
-
-        # Wavefunction methods
-        for name, info in WAVEFUNCTION_METHODS.items():
-            completions.append(
-                CompletionItem(
-                    label=name,
-                    kind=CompletionItemKind.Method,
-                    detail="Wavefunction method",
-                    documentation=info.get("description", ""),
-                )
-            )
-
+        )
+        # Wavefunction methods get a fixed detail label
+        for item in completions[len(completions) - len(WAVEFUNCTION_METHODS) :]:
+            item.detail = "Wavefunction method"
         return completions
 
     def _get_basis_completions(self) -> List[CompletionItem]:
         """Get basis set completions"""
-        completions: List[CompletionItem] = []
-
-        for name, info in BASIS_SETS.items():
-            completions.append(
-                CompletionItem(
-                    label=name,
-                    kind=CompletionItemKind.Class,
-                    detail=info.get("type", ""),
-                    documentation=info.get("description", ""),
-                )
-            )
-
-        return completions
+        return self._create_completions(BASIS_SETS, CompletionItemKind.Class, "type")
 
     def _get_job_completions(self) -> List[CompletionItem]:
         """Get job type completions"""
-        completions: List[CompletionItem] = []
-
-        for name, info in JOB_TYPES.items():
-            completions.append(
-                CompletionItem(
-                    label=name,
-                    kind=CompletionItemKind.Event,
-                    detail="Job type",
-                    documentation=info.get("description", ""),
-                )
-            )
-
-        return completions
+        return self._create_completions(JOB_TYPES, CompletionItemKind.Event, "type")
 
     def _get_element_completions(self) -> List[CompletionItem]:
         """Get element symbol completions for geometry"""
-        completions: List[CompletionItem] = []
-
-        for element in _SORTED_ELEMENTS:
-            completions.append(
-                CompletionItem(
-                    label=element,
-                    kind=CompletionItemKind.EnumMember,
-                    detail=f"Element {element}",
-                )
+        return [
+            CompletionItem(
+                label=element,
+                kind=CompletionItemKind.EnumMember,
+                detail=f"Element {element}",
             )
-
-        return completions
+            for element in _SORTED_ELEMENTS
+        ]
 
     def _in_geometry_section(self, line: str) -> bool:
         """Check if we're in a geometry section"""
@@ -270,47 +256,36 @@ class ORCALanguageServer(LanguageServer):
         if not word:
             return None
 
-        # Look up documentation
+        # Look up documentation using unified lookup
         word_upper = word.upper()
 
-        # Check methods
-        if word_upper in DFT_FUNCTIONALS:
-            info = DFT_FUNCTIONALS[word_upper]
-            return Hover(
-                contents=MarkupContent(
-                    kind=MarkupKind.Markdown,
-                    value=f"**{word}**\n\n{info.get('description', '')}\n\nType: {info.get('type', 'N/A')}",
-                )
-            )
+        # Sources that include a Type line in hover output
+        type_sources = [DFT_FUNCTIONALS, BASIS_SETS]
+        # Sources that only show description
+        plain_sources = [WAVEFUNCTION_METHODS, JOB_TYPES]
 
-        if word_upper in WAVEFUNCTION_METHODS:
-            info = WAVEFUNCTION_METHODS[word_upper]
-            return Hover(
-                contents=MarkupContent(
-                    kind=MarkupKind.Markdown, value=f"**{word}**\n\n{info.get('description', '')}"
+        for source in type_sources:
+            if word_upper in source:
+                info = source[word_upper]
+                return Hover(
+                    contents=MarkupContent(
+                        kind=MarkupKind.Markdown,
+                        value=(
+                            f"**{word}**\n\n{info.get('description', '')}"
+                            f"\n\nType: {info.get('type', 'N/A')}"
+                        ),
+                    )
                 )
-            )
 
-        # Check basis sets
-        if word_upper in BASIS_SETS:
-            info = BASIS_SETS[
-                word_upper
-            ]  # pragma: no cover (hard to test due to hyphen in basis set names)
-            return Hover(
-                contents=MarkupContent(  # pragma: no cover (hard to test due to hyphen in basis set names)
-                    kind=MarkupKind.Markdown,
-                    value=f"**{word}**\n\n{info.get('description', '')}\n\nType: {info.get('type', 'N/A')}",
+        for source in plain_sources:
+            if word_upper in source:
+                info = source[word_upper]
+                return Hover(
+                    contents=MarkupContent(
+                        kind=MarkupKind.Markdown,
+                        value=f"**{word}**\n\n{info.get('description', '')}",
+                    )
                 )
-            )
-
-        # Check job types
-        if word_upper in JOB_TYPES:
-            info = JOB_TYPES[word_upper]
-            return Hover(
-                contents=MarkupContent(
-                    kind=MarkupKind.Markdown, value=f"**{word}**\n\n{info.get('description', '')}"
-                )
-            )
 
         return None
 
@@ -329,6 +304,22 @@ class ORCALanguageServer(LanguageServer):
 
         return str(line[start:end])
 
+    @staticmethod
+    def _create_diagnostic(
+        item: dict, severity: DiagnosticSeverity
+    ) -> Diagnostic:
+        """Create an LSP Diagnostic from a parsed error/warning item."""
+        line = item.get("line", 0)
+        return Diagnostic(
+            range=Range(
+                start=Position(line=line, character=0),
+                end=Position(line=line, character=100),
+            ),
+            message=item.get("message", ""),
+            severity=severity,
+            source="orca-lsp",
+        )
+
     def _validate_document(self, uri: str) -> None:
         """Validate a document and publish diagnostics"""
         document = self.workspace.get_text_document(uri)
@@ -338,33 +329,14 @@ class ORCALanguageServer(LanguageServer):
         result = self.parser.parse(content)
 
         # Convert to LSP diagnostics
-        diagnostics: List[Diagnostic] = []
-
-        for error in result.errors:
-            diagnostics.append(
-                Diagnostic(
-                    range=Range(
-                        start=Position(line=error.get("line", 0), character=0),
-                        end=Position(line=error.get("line", 0), character=100),
-                    ),
-                    message=error.get("message", ""),
-                    severity=DiagnosticSeverity.Error,
-                    source="orca-lsp",
-                )
-            )
-
-        for warning in result.warnings:
-            diagnostics.append(
-                Diagnostic(
-                    range=Range(
-                        start=Position(line=warning.get("line", 0), character=0),
-                        end=Position(line=warning.get("line", 0), character=100),
-                    ),
-                    message=warning.get("message", ""),
-                    severity=DiagnosticSeverity.Warning,
-                    source="orca-lsp",
-                )
-            )
+        diagnostics: List[Diagnostic] = [
+            self._create_diagnostic(error, DiagnosticSeverity.Error)
+            for error in result.errors
+        ]
+        diagnostics.extend(
+            self._create_diagnostic(warning, DiagnosticSeverity.Warning)
+            for warning in result.warnings
+        )
 
         # Publish diagnostics
         self.publish_diagnostics(uri, diagnostics)
