@@ -150,8 +150,12 @@ class ORCAParser:
         """Parse simple input line starting with !"""
         result = SimpleInput(raw=line, line_number=line_number)
 
-        # Remove ! and split by whitespace
+        # Remove leading ! and strip inline comments (a second ! starts a comment)
         content = line[1:].strip()
+        comment_pos = content.find("!")
+        if comment_pos >= 0:
+            content = content[:comment_pos].strip()
+
         tokens = content.split()
 
         for token in tokens:
@@ -321,10 +325,20 @@ class ORCAParser:
         while i < len(lines):
             line = lines[i].strip()
 
-            # End of geometry
-            if line == "*":
+            # End of geometry: bare '*' or '*' followed by trailing text/comment
+            if line == "*" or line.startswith("* "):
                 geom.line_end = i
                 break
+
+            # Skip inline comments in atom lines
+            comment_pos = line.find("!")
+            if comment_pos >= 0:
+                line = line[:comment_pos].strip()
+
+            # Skip empty lines
+            if not line:
+                i += 1
+                continue
 
             # Parse atom
             atom_parts = line.split()
