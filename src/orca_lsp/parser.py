@@ -267,15 +267,6 @@ class ORCAParser:
                 if match:
                     block.parameters[param_name] = int(match.group(1))
 
-<<<<<<< HEAD
-        elif block.name == "pal":
-            # %pal nprocs 4 end
-            for line in lines:
-                if "nprocs" in line.lower():
-                    match = _NPROCS_RE.search(line)
-                    if match:
-                        block.parameters["nprocs"] = int(match.group(1))
-=======
     @staticmethod
     def _parse_maxcore(block: PercentBlock, content: str) -> None:
         """Parse %maxcore block parameters."""
@@ -286,7 +277,6 @@ class ORCAParser:
                     block.parameters["memory"] = int(parts[1])
                 except ValueError:
                     pass
->>>>>>> origin/main
 
     @staticmethod
     def _parse_method(block: PercentBlock, content: str) -> None:
@@ -300,34 +290,6 @@ class ORCAParser:
             elif "d4" in stripped:
                 block.parameters["dispersion"] = "D4"
 
-<<<<<<< HEAD
-        elif block.name == "scf":
-            # %scf settings
-            for line in lines:
-                stripped = line.strip().lower()
-                if "maxiter" in stripped:
-                    match = _MAXITER_RE.search(stripped)
-                    if match:
-                        block.parameters["maxiter"] = int(match.group(1))
-
-        elif block.name == "eprnmr":
-            # %eprnmr settings
-            for line in lines:
-                stripped = line.strip().lower()
-                if "gtensor" in stripped:
-                    match = _GTENSOR_RE.search(stripped)
-                    if match:
-                        block.parameters["gtensor"] = int(match.group(1))
-
-        elif block.name == "rirpa":
-            # %rirpa settings
-            for line in lines:
-                stripped = line.strip().lower()
-                if "nroots" in stripped:
-                    match = _NROOTS_RE.search(stripped)
-                    if match:
-                        block.parameters["nroots"] = int(match.group(1))
-=======
     def _parse_pal(self, block: PercentBlock, content: str) -> None:
         """Parse %pal block parameters."""
         self._parse_regex_param(block, content, "nprocs", _NPROCS_RE, "nprocs")
@@ -343,7 +305,6 @@ class ORCAParser:
     def _parse_rirpa(self, block: PercentBlock, content: str) -> None:
         """Parse %rirpa block parameters."""
         self._parse_regex_param(block, content, "nroots", _NROOTS_RE, "nroots")
->>>>>>> origin/main
 
     def parse_geometry(self, lines: List[str], start_line: int) -> Tuple[Optional[Geometry], int]:
         """Parse geometry section (* xyz ... *)"""
@@ -374,20 +335,20 @@ class ORCAParser:
         while i < len(lines):
             line = lines[i].strip()
 
-            # End of geometry: bare '*' or '*' followed by trailing text/comment
+            # End of geometry (bare * or * with trailing text like "* end")
             if line == "*" or line.startswith("* "):
                 geom.line_end = i
                 break
 
-            # Skip inline comments in atom lines
-            comment_pos = line.find("!")
-            if comment_pos >= 0:
-                line = line[:comment_pos].strip()
-
-            # Skip empty lines
+            # Skip empty lines within geometry block
             if not line:
                 i += 1
                 continue
+
+            # Strip inline comments from atom lines (e.g., "H 0.0 0.0 0.0 ! hydrogen")
+            comment_pos = line.find("!")
+            if comment_pos >= 0:
+                line = line[:comment_pos].strip()
 
             # Parse atom
             atom_parts = line.split()
