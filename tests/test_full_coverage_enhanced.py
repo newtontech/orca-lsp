@@ -1,12 +1,13 @@
 """Enhanced tests for full coverage."""
 
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, PropertyMock
 from lsprotocol.types import (
     Position,
     TextDocumentItem,
     TextDocumentIdentifier,
     VersionedTextDocumentIdentifier,
+    CodeActionContext,
     CodeActionParams,
     Range,
     DidOpenTextDocumentParams,
@@ -129,19 +130,27 @@ class TestServerDocumentValidation:
 
     @pytest.fixture
     def server(self):
-        return ORCALanguageServer()
+        server = ORCALanguageServer()
+        type(server).workspace = PropertyMock(return_value=MagicMock())
+        return server
 
-    @patch("orca_lsp.server.ORCALanguageServer.publish_diagnostics")
-    def test_validate_and_publish_empty(self, mock_publish, server):
+    def test_validate_and_publish_empty(self, server):
         """Test validation of empty document."""
+        mock_doc = MagicMock()
+        mock_doc.source = ""
+        server.workspace.get_text_document.return_value = mock_doc
+        server.publish_diagnostics = MagicMock()
         server._validate_document("test://empty.inp")
-        assert mock_publish.called
+        server.publish_diagnostics.assert_called_once()
 
-    @patch("orca_lsp.server.ORCALanguageServer.publish_diagnostics")
-    def test_validate_and_publish_with_errors(self, mock_publish, server):
+    def test_validate_and_publish_with_errors(self, server):
         """Test validation with errors."""
+        mock_doc = MagicMock()
+        mock_doc.source = "! INVALID"
+        server.workspace.get_text_document.return_value = mock_doc
+        server.publish_diagnostics = MagicMock()
         server._validate_document("test://with_errors.inp")
-        assert mock_publish.called
+        server.publish_diagnostics.assert_called_once()
 
 
 class TestServerDiagnostics:
@@ -169,26 +178,34 @@ class TestCodeActions:
 
     @pytest.fixture
     def server(self):
-        return ORCALanguageServer()
+        server = ORCALanguageServer()
+        type(server).workspace = PropertyMock(return_value=MagicMock())
+        return server
 
     def test_code_action_no_diagnostics(self, server):
         """Test code action with no diagnostics."""
+        mock_doc = MagicMock()
+        mock_doc.source = "! B3LYP def2-TZVP"
+        server.workspace.get_text_document.return_value = mock_doc
         params = CodeActionParams(
             text_document=TextDocumentIdentifier(uri="test"),
             range=Range(start=Position(line=0, character=0), end=Position(line=0, character=0)),
-            context=MagicMock(diagnostics=[]),
+            context=CodeActionContext(diagnostics=[]),
         )
         actions = server._on_code_action(params)
         assert isinstance(actions, list)
 
     def test_code_action_other_diagnostic(self, server):
         """Test code action with unrelated diagnostic."""
+        mock_doc = MagicMock()
+        mock_doc.source = "! B3LYP def2-TZVP"
+        server.workspace.get_text_document.return_value = mock_doc
         mock_diagnostic = MagicMock()
         mock_diagnostic.message = "Some other error"
         params = CodeActionParams(
             text_document=TextDocumentIdentifier(uri="test"),
             range=Range(start=Position(line=0, character=0), end=Position(line=0, character=0)),
-            context=MagicMock(diagnostics=[mock_diagnostic]),
+            context=CodeActionContext(diagnostics=[mock_diagnostic]),
         )
         actions = server._on_code_action(params)
         assert isinstance(actions, list)
@@ -199,11 +216,16 @@ class TestDocumentEventsIntegration:
 
     @pytest.fixture
     def server(self):
-        return ORCALanguageServer()
+        server = ORCALanguageServer()
+        type(server).workspace = PropertyMock(return_value=MagicMock())
+        return server
 
-    @patch("orca_lsp.server.ORCALanguageServer.publish_diagnostics")
-    def test_did_open_calls_validation(self, mock_publish, server):
+    def test_did_open_calls_validation(self, server):
         """Test that didOpen calls validation."""
+        mock_doc = MagicMock()
+        mock_doc.source = "! B3LYP def2-SVP\n* xyz 0 1\nH 0 0 0\n*"
+        server.workspace.get_text_document.return_value = mock_doc
+        server.publish_diagnostics = MagicMock()
         params = DidOpenTextDocumentParams(
             text_document=TextDocumentItem(
                 uri="test://open.inp",
@@ -213,17 +235,20 @@ class TestDocumentEventsIntegration:
             )
         )
         server._on_did_open(params)
-        assert mock_publish.called
+        server.publish_diagnostics.assert_called_once()
 
-    @patch("orca_lsp.server.ORCALanguageServer.publish_diagnostics")
-    def test_did_change_calls_validation(self, mock_publish, server):
+    def test_did_change_calls_validation(self, server):
         """Test that didChange calls validation."""
+        mock_doc = MagicMock()
+        mock_doc.source = "! B3LYP def2-SVP\n* xyz 0 1\nH 0 0 0\n*"
+        server.workspace.get_text_document.return_value = mock_doc
+        server.publish_diagnostics = MagicMock()
         params = DidChangeTextDocumentParams(
             text_document=VersionedTextDocumentIdentifier(uri="test://change.inp", version=2),
             content_changes=[],
         )
         server._on_did_change(params)
-        assert mock_publish.called
+        server.publish_diagnostics.assert_called_once()
 
 
 class TestParserAllBranches:
