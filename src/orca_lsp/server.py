@@ -43,11 +43,8 @@ from .parser import ORCAParser
 # Pre-sorted elements for completions (avoid sorting on every request)
 _SORTED_ELEMENTS = tuple(sorted(ELEMENTS))
 
-<<<<<<< HEAD
-=======
 # Regex for extracting %block name from a line (O(1) lookup vs O(n*m) loop)
 _PERCENT_BLOCK_NAME_RE = re.compile(r"%\s*(\w+)", re.IGNORECASE)
->>>>>>> origin/main
 
 class ORCALanguageServer(LanguageServer):
     """ORCA Language Server"""
@@ -132,15 +129,9 @@ class ORCALanguageServer(LanguageServer):
 
         # Check if we're in a specific block - use regex to extract block name directly
         # More efficient than looping through all block names
-<<<<<<< HEAD
-        block_match = re.match(r"%(\w+)", line, re.IGNORECASE)
-        if block_match:
-            block_name = block_match.group(1).lower()
-=======
         match = _PERCENT_BLOCK_NAME_RE.match(line)
         if match:
             block_name = match.group(1).lower()
->>>>>>> origin/main
             if block_name in PERCENT_BLOCKS:
                 completions.extend(self._get_block_specific_completions(block_name))
 
@@ -243,23 +234,11 @@ class ORCALanguageServer(LanguageServer):
 
     def _get_element_completions(self) -> List[CompletionItem]:
         """Get element symbol completions for geometry"""
-<<<<<<< HEAD
-        completions: List[CompletionItem] = []
-
-        for element in _SORTED_ELEMENTS:
-            completions.append(
-                CompletionItem(
-                    label=element,
-                    kind=CompletionItemKind.EnumMember,
-                    detail=f"Element {element}",
-                )
-=======
         return [
             CompletionItem(
                 label=element,
                 kind=CompletionItemKind.EnumMember,
                 detail=f"Element {element}",
->>>>>>> origin/main
             )
             for element in _SORTED_ELEMENTS
         ]
