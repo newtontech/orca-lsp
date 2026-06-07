@@ -6,6 +6,12 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from .keywords import BASIS_SETS, DFT_FUNCTIONALS, ELEMENTS, JOB_TYPES, WAVEFUNCTION_METHODS
 
+# Pre-compiled regex patterns for %block parameter parsing (avoid recompilation in loops)
+_NPROCS_RE = re.compile(r"nprocs\s+(\d+)", re.IGNORECASE)
+_MAXITER_RE = re.compile(r"maxiter\s+(\d+)", re.IGNORECASE)
+_GTENSOR_RE = re.compile(r"gtensor\s+(\d+)", re.IGNORECASE)
+_NROOTS_RE = re.compile(r"nroots\s+(\d+)", re.IGNORECASE)
+
 
 @dataclass
 class SimpleInput:
@@ -244,7 +250,7 @@ class ORCAParser:
             # %pal nprocs 4 end
             for line in lines:
                 if "nprocs" in line.lower():
-                    match = re.search(r"nprocs\s+(\d+)", line, re.IGNORECASE)
+                    match = _NPROCS_RE.search(line)
                     if match:
                         block.parameters["nprocs"] = int(match.group(1))
 
@@ -264,7 +270,7 @@ class ORCAParser:
             for line in lines:
                 stripped = line.strip().lower()
                 if "maxiter" in stripped:
-                    match = re.search(r"maxiter\s+(\d+)", stripped)
+                    match = _MAXITER_RE.search(stripped)
                     if match:
                         block.parameters["maxiter"] = int(match.group(1))
 
@@ -273,7 +279,7 @@ class ORCAParser:
             for line in lines:
                 stripped = line.strip().lower()
                 if "gtensor" in stripped:
-                    match = re.search(r"gtensor\s+(\d+)", stripped)
+                    match = _GTENSOR_RE.search(stripped)
                     if match:
                         block.parameters["gtensor"] = int(match.group(1))
 
@@ -282,7 +288,7 @@ class ORCAParser:
             for line in lines:
                 stripped = line.strip().lower()
                 if "nroots" in stripped:
-                    match = re.search(r"nroots\s+(\d+)", stripped)
+                    match = _NROOTS_RE.search(stripped)
                     if match:
                         block.parameters["nroots"] = int(match.group(1))
 
