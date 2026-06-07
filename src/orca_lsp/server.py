@@ -3,8 +3,10 @@
 import re
 from typing import TYPE_CHECKING, List, Optional
 
-from pygls.server import LanguageServer
 from lsprotocol.types import (
+    CodeAction,
+    CodeActionKind,
+    CodeActionParams,
     CompletionItem,
     CompletionItemKind,
     CompletionList,
@@ -20,31 +22,30 @@ from lsprotocol.types import (
     Position,
     Range,
     TextEdit,
-    CodeAction,
-    CodeActionKind,
-    CodeActionParams,
     WorkspaceEdit,
 )
+from pygls.server import LanguageServer
 
 if TYPE_CHECKING:
     from pygls.workspace import TextDocument
 
-from .parser import ORCAParser
+from . import __version__
 from .keywords import (
-    DFT_FUNCTIONALS,
-    WAVEFUNCTION_METHODS,
     BASIS_SETS,
+    DFT_FUNCTIONALS,
+    ELEMENTS,
     JOB_TYPES,
     PERCENT_BLOCKS,
-    ELEMENTS,
+    WAVEFUNCTION_METHODS,
 )
+from .parser import ORCAParser
 
 
 class ORCALanguageServer(LanguageServer):
     """ORCA Language Server"""
 
     def __init__(self) -> None:
-        super().__init__("orca-lsp", "0.5.4")
+        super().__init__("orca-lsp", __version__)
         self.parser = ORCAParser()
         self._setup_features()
 

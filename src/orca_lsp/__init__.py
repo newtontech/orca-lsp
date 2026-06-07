@@ -1,3 +1,8 @@
 """orca-lsp - Language Server Protocol for ORCA"""
 
-__version__ = "0.1.0"
+from importlib.metadata import PackageNotFoundError, version
+
+try:
+    __version__ = version("orca-lsp")
+except PackageNotFoundError:  # pragma: no cover - only used from an unpackaged source tree
+    __version__ = "0.5.4"

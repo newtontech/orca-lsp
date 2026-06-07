@@ -2,8 +2,9 @@
 
 import re
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional, Tuple, Any
-from .keywords import DFT_FUNCTIONALS, WAVEFUNCTION_METHODS, BASIS_SETS, JOB_TYPES, ELEMENTS
+from typing import Any, Dict, List, Optional, Tuple
+
+from .keywords import BASIS_SETS, DFT_FUNCTIONALS, ELEMENTS, JOB_TYPES, WAVEFUNCTION_METHODS
 
 
 @dataclass
@@ -88,6 +89,12 @@ class ORCAParser:
         self.basis_sets = set(BASIS_SETS.keys())
         self.job_types = set(JOB_TYPES.keys())
         self.all_methods = self.dft_functionals | self.wavefunction_methods
+        self._dft_functionals_by_upper = {name.upper(): name for name in self.dft_functionals}
+        self._wavefunction_methods_by_upper = {
+            name.upper(): name for name in self.wavefunction_methods
+        }
+        self._basis_sets_by_upper = {name.upper(): name for name in self.basis_sets}
+        self._job_types_by_upper = {name.upper(): name for name in self.job_types}
 
     def parse(self, content: str) -> ParseResult:
         """Parse complete ORCA input file"""
@@ -144,29 +151,16 @@ class ORCAParser:
         for token in tokens:
             token_upper = token.upper()
 
-            if token_upper in self.dft_functionals:
-                result.methods.append(token)
-            elif token_upper in self.wavefunction_methods:
-                result.methods.append(token)
-            elif token_upper in self.basis_sets:
-                result.basis_sets.append(token)
-            elif token_upper in self.job_types:
-                result.job_types.append(token)
+            if token_upper in self._dft_functionals_by_upper:
+                result.methods.append(self._dft_functionals_by_upper[token_upper])
+            elif token_upper in self._wavefunction_methods_by_upper:
+                result.methods.append(self._wavefunction_methods_by_upper[token_upper])
+            elif token_upper in self._basis_sets_by_upper:
+                result.basis_sets.append(self._basis_sets_by_upper[token_upper])
+            elif token_upper in self._job_types_by_upper:
+                result.job_types.append(self._job_types_by_upper[token_upper])
             else:
-                # Check case-insensitively for some keywords
-                if token_upper in [k.upper() for k in self.all_methods]:
-                    # Find the correct case version
-                    for method in self.all_methods:  # pragma: no branch (always breaks)
-                        if method.upper() == token_upper:
-                            result.methods.append(method)
-                            break
-                elif token_upper in [k.upper() for k in self.basis_sets]:
-                    for basis in self.basis_sets:  # pragma: no branch (always breaks)
-                        if basis.upper() == token_upper:
-                            result.basis_sets.append(basis)
-                            break
-                else:
-                    result.other_keywords.append(token)
+                result.other_keywords.append(token)
 
         return result
 
@@ -434,10 +428,10 @@ class ORCAParser:
         if not result.simple_input:
             return
 
-        methods = [m.upper() for m in result.simple_input.methods]
+        keywords = self._simple_input_keywords(result.simple_input)
 
         scf_types = {"RHF", "UHF", "ROHF"}
-        found_scf = [m for m in methods if m in scf_types]
+        found_scf = [keyword for keyword in keywords if keyword in scf_types]
         if len(found_scf) > 1:
             result.errors.append(
                 {
@@ -452,9 +446,14 @@ class ORCAParser:
         if not result.simple_input:
             return
 
-        methods = [m.upper() for m in result.simple_input.methods]
+        keywords = self._simple_input_keywords(result.simple_input)
+        methods = {method.upper() for method in result.simple_input.methods}
 
-        has_dft = any(m in {"B3LYP", "PBE0", "PBE", "M06", "TPSS", "HF", "RHF", "UHF"} for m in methods)
+        self._check_mutually_exclusive_groups(result, keywords)
+
+        has_dft = any(
+            m in {"B3LYP", "PBE0", "PBE", "M06", "TPSS", "HF", "RHF", "UHF"} for m in methods
+        )
         has_mp2 = "MP2" in methods or "RI-MP2" in methods
 
         if has_dft and has_mp2:
@@ -465,6 +464,51 @@ class ORCAParser:
                     "severity": "warning",
                 }
             )
+
+    def _simple_input_keywords(self, simple_input: SimpleInput) -> List[str]:
+        """Return all simple-line keywords normalized for validation."""
+        tokens = (
+            simple_input.methods
+            + simple_input.basis_sets
+            + simple_input.job_types
+            + simple_input.other_keywords
+        )
+        return [token.upper() for token in tokens]
+
+    def _check_mutually_exclusive_groups(self, result: ParseResult, keywords: List[str]) -> None:
+        """Check simple-line keyword groups where ORCA accepts only one choice."""
+        if not result.simple_input:
+            return
+
+        keyword_set = set(keywords)
+        functional_keywords = {
+            keyword.upper()
+            for keyword in result.simple_input.methods
+            if keyword.upper() in self._dft_functionals_by_upper
+        }
+        basis_keywords = {basis.upper() for basis in result.simple_input.basis_sets}
+
+        exclusive_groups = [
+            ("dispersion corrections", {"D3", "D3BJ", "D4"}),
+            ("RI approximations", {"RIJCOSX", "RI-J"}),
+            ("DFT functionals", functional_keywords),
+            ("correlation methods", {"MP2", "RI-MP2", "SCS-MP2", "CCSD", "CCSD(T)"}),
+            ("basis sets", basis_keywords),
+            ("SCF convergence settings", {"TIGHTSCF", "LOOSESCF"}),
+            ("relativistic corrections", {"ZORA", "DKH"}),
+            ("solvent models", {"CPCM", "SMD"}),
+        ]
+
+        for label, group in exclusive_groups:
+            found = sorted(keyword_set & group)
+            if len(found) > 1:
+                result.errors.append(
+                    {
+                        "message": f"Mutually exclusive {label}: {' '.join(found)}",
+                        "line": result.simple_input.line_number,
+                        "severity": "error",
+                    }
+                )
 
     def _check_spin_charge(self, result: ParseResult) -> None:
         """Check spin/charge consistency in geometry"""
