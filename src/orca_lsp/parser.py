@@ -2,7 +2,7 @@
 
 import re
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from .keywords import BASIS_SETS, DFT_FUNCTIONALS, ELEMENTS, JOB_TYPES, WAVEFUNCTION_METHODS
 
@@ -101,6 +101,16 @@ class ORCAParser:
         }
         self._basis_sets_by_upper = {name.upper(): name for name in self.basis_sets}
         self._job_types_by_upper = {name.upper(): name for name in self.job_types}
+
+        # Registry mapping block names to parameter handlers (OCP: extensible without modification)
+        self._block_handlers: Dict[str, Callable[[PercentBlock, str], None]] = {
+            "maxcore": self._parse_maxcore,
+            "method": self._parse_method,
+            "pal": self._parse_pal,
+            "scf": self._parse_scf,
+            "eprnmr": self._parse_eprnmr,
+            "rirpa": self._parse_rirpa,
+        }
 
     def parse(self, content: str) -> ParseResult:
         """Parse complete ORCA input file"""
@@ -233,19 +243,27 @@ class ORCAParser:
         return block, block.line_end
 
     def _parse_block_parameters(self, block: PercentBlock, content: str) -> None:
-        """Parse parameters for a % block"""
-        lines = content.split("\n")
+        """Parse parameters for a % block using a handler registry."""
+        handler = self._block_handlers.get(block.name)
+        if handler is not None:
+            handler(block, content)
 
-        if block.name == "maxcore":
-            # %maxcore 4000
-            for line in lines:
-                parts = line.split()
-                if len(parts) >= 2 and parts[0].lower() == "%maxcore":
-                    try:
-                        block.parameters["memory"] = int(parts[1])
-                    except ValueError:
-                        pass
+    @staticmethod
+    def _parse_regex_param(
+        block: PercentBlock,
+        content: str,
+        keyword: str,
+        pattern: "re.Pattern[str]",
+        param_name: str,
+    ) -> None:
+        """Extract an integer parameter matching a regex pattern."""
+        for line in content.split("\n"):
+            if keyword in line.lower():
+                match = pattern.search(line)
+                if match:
+                    block.parameters[param_name] = int(match.group(1))
 
+<<<<<<< HEAD
         elif block.name == "pal":
             # %pal nprocs 4 end
             for line in lines:
@@ -253,18 +271,32 @@ class ORCAParser:
                     match = _NPROCS_RE.search(line)
                     if match:
                         block.parameters["nprocs"] = int(match.group(1))
+=======
+    @staticmethod
+    def _parse_maxcore(block: PercentBlock, content: str) -> None:
+        """Parse %maxcore block parameters."""
+        for line in content.split("\n"):
+            parts = line.split()
+            if len(parts) >= 2 and parts[0].lower() == "%maxcore":
+                try:
+                    block.parameters["memory"] = int(parts[1])
+                except ValueError:
+                    pass
+>>>>>>> origin/main
 
-        elif block.name == "method":
-            # Parse method block
-            for line in lines:
-                stripped = line.strip().lower()
-                if "d3bj" in stripped:
-                    block.parameters["dispersion"] = "D3BJ"
-                elif "d3" in stripped:
-                    block.parameters["dispersion"] = "D3"
-                elif "d4" in stripped:
-                    block.parameters["dispersion"] = "D4"
+    @staticmethod
+    def _parse_method(block: PercentBlock, content: str) -> None:
+        """Parse %method block parameters."""
+        for line in content.split("\n"):
+            stripped = line.strip().lower()
+            if "d3bj" in stripped:
+                block.parameters["dispersion"] = "D3BJ"
+            elif "d3" in stripped:
+                block.parameters["dispersion"] = "D3"
+            elif "d4" in stripped:
+                block.parameters["dispersion"] = "D4"
 
+<<<<<<< HEAD
         elif block.name == "scf":
             # %scf settings
             for line in lines:
@@ -291,6 +323,23 @@ class ORCAParser:
                     match = _NROOTS_RE.search(stripped)
                     if match:
                         block.parameters["nroots"] = int(match.group(1))
+=======
+    def _parse_pal(self, block: PercentBlock, content: str) -> None:
+        """Parse %pal block parameters."""
+        self._parse_regex_param(block, content, "nprocs", _NPROCS_RE, "nprocs")
+
+    def _parse_scf(self, block: PercentBlock, content: str) -> None:
+        """Parse %scf block parameters."""
+        self._parse_regex_param(block, content, "maxiter", _MAXITER_RE, "maxiter")
+
+    def _parse_eprnmr(self, block: PercentBlock, content: str) -> None:
+        """Parse %eprnmr block parameters."""
+        self._parse_regex_param(block, content, "gtensor", _GTENSOR_RE, "gtensor")
+
+    def _parse_rirpa(self, block: PercentBlock, content: str) -> None:
+        """Parse %rirpa block parameters."""
+        self._parse_regex_param(block, content, "nroots", _NROOTS_RE, "nroots")
+>>>>>>> origin/main
 
     def parse_geometry(self, lines: List[str], start_line: int) -> Tuple[Optional[Geometry], int]:
         """Parse geometry section (* xyz ... *)"""
