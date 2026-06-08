@@ -15,6 +15,8 @@ from lsprotocol.types import (
     DiagnosticSeverity,
     DidChangeTextDocumentParams,
     DidOpenTextDocumentParams,
+    DocumentFormattingParams,
+    DocumentRangeFormattingParams,
     Hover,
     HoverParams,
     MarkupContent,
@@ -39,6 +41,7 @@ from .keywords import (
     WAVEFUNCTION_METHODS,
 )
 from .features.diagnostic import DiagnosticProvider
+from .features.formatting import FormattingProvider
 from .features.lint import LintProvider
 from .features.typecheck import TypecheckProvider
 from .parser import ORCAParser
@@ -61,6 +64,7 @@ class ORCALanguageServer(LanguageServer):
         super().__init__("orca-lsp", __version__)
         self.parser = parser if parser is not None else ORCAParser()
         self.diagnostic_provider = DiagnosticProvider(self.parser)
+        self.formatting_provider = FormattingProvider(self)
         self.lint_provider = LintProvider(self.parser)
         self.typecheck_provider = TypecheckProvider(self.parser)
         self._setup_features()
@@ -87,6 +91,16 @@ class ORCALanguageServer(LanguageServer):
         @self.feature("textDocument/didChange")
         def on_did_change(params: DidChangeTextDocumentParams) -> None:
             self._on_did_change(params)  # pragma: no cover
+
+        @self.feature("textDocument/formatting")
+        def on_formatting(params: DocumentFormattingParams) -> List[TextEdit]:
+            return self._on_formatting(params)  # pragma: no cover
+
+        @self.feature("textDocument/rangeFormatting")
+        def on_range_formatting(
+            params: DocumentRangeFormattingParams,
+        ) -> List[TextEdit]:
+            return self._on_range_formatting(params)  # pragma: no cover
 
     def _on_completion(self, params: CompletionParams) -> Optional[CompletionList]:
         """Handle completion requests"""
@@ -376,6 +390,18 @@ class ORCALanguageServer(LanguageServer):
                 actions.append(action)
 
         return actions
+
+    def _on_formatting(self, params: DocumentFormattingParams) -> List[TextEdit]:
+        """Handle document formatting requests."""
+        document = self.workspace.get_text_document(params.text_document.uri)
+        return self.formatting_provider.format_document(document.source, params)
+
+    def _on_range_formatting(
+        self, params: DocumentRangeFormattingParams
+    ) -> List[TextEdit]:
+        """Handle range formatting requests."""
+        document = self.workspace.get_text_document(params.text_document.uri)
+        return self.formatting_provider.format_range(document.source, params)
 
     def _on_did_open(self, params: DidOpenTextDocumentParams) -> None:
         """Handle document open"""
