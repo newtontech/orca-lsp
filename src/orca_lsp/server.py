@@ -38,6 +38,7 @@ from .keywords import (
     PERCENT_BLOCKS,
     WAVEFUNCTION_METHODS,
 )
+from .features.diagnostic import DiagnosticProvider
 from .parser import ORCAParser
 
 # Pre-sorted elements for completions (avoid sorting on every request)
@@ -57,6 +58,7 @@ class ORCALanguageServer(LanguageServer):
     def __init__(self, parser: Optional[ORCAParser] = None) -> None:
         super().__init__("orca-lsp", __version__)
         self.parser = parser if parser is not None else ORCAParser()
+        self.diagnostic_provider = DiagnosticProvider(self.parser)
         self._setup_features()
 
     def _setup_features(self) -> None:
@@ -329,17 +331,8 @@ class ORCALanguageServer(LanguageServer):
         document = self.workspace.get_text_document(uri)
         content = document.source
 
-        # Parse the document
-        result = self.parser.parse(content)
-
-        # Convert to LSP diagnostics
-        diagnostics: List[Diagnostic] = [
-            self._create_diagnostic(error, DiagnosticSeverity.Error) for error in result.errors
-        ]
-        diagnostics.extend(
-            self._create_diagnostic(warning, DiagnosticSeverity.Warning)
-            for warning in result.warnings
-        )
+        # Use the DiagnosticProvider for consistent diagnostics
+        diagnostics = self.diagnostic_provider.get_diagnostics(content)
 
         # Publish diagnostics
         self.publish_diagnostics(uri, diagnostics)
