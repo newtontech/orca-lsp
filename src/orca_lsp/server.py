@@ -39,6 +39,7 @@ from .keywords import (
     WAVEFUNCTION_METHODS,
 )
 from .features.diagnostic import DiagnosticProvider
+from .features.lint import LintProvider
 from .parser import ORCAParser
 
 # Pre-sorted elements for completions (avoid sorting on every request)
@@ -59,6 +60,7 @@ class ORCALanguageServer(LanguageServer):
         super().__init__("orca-lsp", __version__)
         self.parser = parser if parser is not None else ORCAParser()
         self.diagnostic_provider = DiagnosticProvider(self.parser)
+        self.lint_provider = LintProvider(self.parser)
         self._setup_features()
 
     def _setup_features(self) -> None:
@@ -333,6 +335,9 @@ class ORCALanguageServer(LanguageServer):
 
         # Use the DiagnosticProvider for consistent diagnostics
         diagnostics = self.diagnostic_provider.get_diagnostics(content)
+
+        # Merge lint diagnostics (schema-aware static checks)
+        diagnostics.extend(self.lint_provider.lint(content))
 
         # Publish diagnostics
         self.publish_diagnostics(uri, diagnostics)
