@@ -142,9 +142,7 @@ class ORCAValidator:
                 }
             )
 
-    def _check_mutually_exclusive_groups(
-        self, result: ParseResult, keywords: List[str]
-    ) -> None:
+    def _check_mutually_exclusive_groups(self, result: ParseResult, keywords: List[str]) -> None:
         """Check simple-line keyword groups where ORCA accepts only one choice."""
         if not result.simple_input:
             return
