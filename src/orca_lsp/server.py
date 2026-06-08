@@ -11,16 +11,19 @@ from lsprotocol.types import (
     CompletionItemKind,
     CompletionList,
     CompletionParams,
+    DefinitionParams,
     Diagnostic,
     DiagnosticSeverity,
     DidChangeTextDocumentParams,
     DidOpenTextDocumentParams,
     Hover,
     HoverParams,
+    Location,
     MarkupContent,
     MarkupKind,
     Position,
     Range,
+    ReferenceParams,
     TextEdit,
     WorkspaceEdit,
 )
@@ -38,8 +41,14 @@ from .keywords import (
     PERCENT_BLOCKS,
     WAVEFUNCTION_METHODS,
 )
+from .features.code_actions import CodeActionProvider
 from .features.diagnostic import DiagnosticProvider
 from .features.lint import LintProvider
+from .features.navigation import (
+    DefinitionProvider,
+    HoverProvider,
+    ReferencesProvider,
+)
 from .parser import ORCAParser
 
 # Pre-sorted elements for completions (avoid sorting on every request)
@@ -61,6 +70,10 @@ class ORCALanguageServer(LanguageServer):
         self.parser = parser if parser is not None else ORCAParser()
         self.diagnostic_provider = DiagnosticProvider(self.parser)
         self.lint_provider = LintProvider(self.parser)
+        self.code_action_provider = CodeActionProvider(self.parser)
+        self.definition_provider = DefinitionProvider(self.parser)
+        self.hover_provider = HoverProvider(self.parser)
+        self.references_provider = ReferencesProvider(self.parser)
         self._setup_features()
 
     def _setup_features(self) -> None:
@@ -73,6 +86,14 @@ class ORCALanguageServer(LanguageServer):
         @self.feature("textDocument/hover")
         def on_hover(params: HoverParams) -> Optional[Hover]:
             return self._on_hover(params)  # pragma: no cover
+
+        @self.feature("textDocument/definition")
+        def on_definition(params: DefinitionParams) -> Optional[Location]:
+            return self._on_definition(params)  # pragma: no cover
+
+        @self.feature("textDocument/references")
+        def on_references(params: ReferenceParams) -> List[Location]:
+            return self._on_references(params)  # pragma: no cover
 
         @self.feature("textDocument/codeAction")
         def on_code_action(params: CodeActionParams) -> List[CodeAction]:
@@ -257,47 +278,24 @@ class ORCALanguageServer(LanguageServer):
         return bool(re.match(r"^[A-Z][a-z]?\s+[-\d\.]", line.strip()))
 
     def _on_hover(self, params: HoverParams) -> Optional[Hover]:
-        """Handle hover requests"""
+        """Handle hover requests via the shared HoverProvider."""
         document = self.workspace.get_text_document(params.text_document.uri)
-        position = params.position
+        return self.hover_provider.get_hover(document.source, params.position)
 
-        # Get word at position
-        word = self._get_word_at_position(document, position)
-        if not word:
-            return None
+    def _on_definition(self, params: DefinitionParams) -> Optional[Location]:
+        """Handle go-to-definition requests via the shared DefinitionProvider."""
+        document = self.workspace.get_text_document(params.text_document.uri)
+        return self.definition_provider.get_definition(document.source, params.position)
 
-        # Look up documentation using unified lookup
-        word_upper = word.upper()
-
-        # Sources that include a Type line in hover output
-        type_sources = [DFT_FUNCTIONALS, BASIS_SETS]
-        # Sources that only show description
-        plain_sources = [WAVEFUNCTION_METHODS, JOB_TYPES]
-
-        for source in type_sources:
-            if word_upper in source:
-                info = source[word_upper]
-                return Hover(
-                    contents=MarkupContent(
-                        kind=MarkupKind.Markdown,
-                        value=(
-                            f"**{word}**\n\n{info.get('description', '')}"
-                            f"\n\nType: {info.get('type', 'N/A')}"
-                        ),
-                    )
-                )
-
-        for source in plain_sources:
-            if word_upper in source:
-                info = source[word_upper]
-                return Hover(
-                    contents=MarkupContent(
-                        kind=MarkupKind.Markdown,
-                        value=f"**{word}**\n\n{info.get('description', '')}",
-                    )
-                )
-
-        return None
+    def _on_references(self, params: ReferenceParams) -> List[Location]:
+        """Handle find-references requests via the shared ReferencesProvider."""
+        document = self.workspace.get_text_document(params.text_document.uri)
+        return self.references_provider.get_references(
+            document.source,
+            params.text_document.uri,
+            params.position,
+            include_declaration=params.context.include_declaration,
+        )
 
     def _get_word_at_position(self, document: "TextDocument", position: Position) -> str:
         """Get the word at the given position"""
@@ -344,31 +342,24 @@ class ORCALanguageServer(LanguageServer):
 
     def _on_code_action(self, params: CodeActionParams) -> List[CodeAction]:
         """Handle code action requests"""
-        actions: List[CodeAction] = []
-        self.workspace.get_text_document(params.text_document.uri)
+        document = self.workspace.get_text_document(params.text_document.uri)
+        source = document.source
 
-        # Get diagnostics at this range
-        for diagnostic in params.context.diagnostics:
-            # Add maxcore quick fix
-            if "Missing %maxcore" in diagnostic.message:
-                action = CodeAction(
-                    title="Add %maxcore 4000",
-                    kind=CodeActionKind.QuickFix,
-                    edit=WorkspaceEdit(
-                        changes={
-                            params.text_document.uri: [
-                                TextEdit(
-                                    range=Range(
-                                        start=Position(line=1, character=0),
-                                        end=Position(line=1, character=0),
-                                    ),
-                                    new_text="%maxcore 4000\n",
-                                )
-                            ]
-                        }
-                    ),
-                )
-                actions.append(action)
+        # Delegate to the CodeActionProvider
+        actions = self.code_action_provider.get_code_actions(
+            source, params.context.diagnostics,
+        )
+
+        # Rewrite document URI into workspace edit changes (the provider uses
+        # the placeholder key "document" for testability).
+        uri = params.text_document.uri
+        for action in actions:
+            if action.edit and action.edit.changes:
+                new_changes: dict = {}
+                for change_uri, edits in action.edit.changes.items():
+                    target_uri = uri if change_uri == "document" else change_uri
+                    new_changes[target_uri] = edits
+                action.edit.changes = new_changes
 
         return actions
 

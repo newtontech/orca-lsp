@@ -287,8 +287,8 @@ class TestCodeActionBehavior:
         assert len(actions) > 0
         assert any("maxcore" in action.title.lower() for action in actions)
 
-    def test_code_action_no_match_returns_empty(self, server):
-        """Code action returns empty list for non-maxcore diagnostics."""
+    def test_code_action_no_match_returns_general_actions(self, server):
+        """Code action returns general actions (e.g. %maxcore) for unrecognized diagnostics."""
         mock_doc = MockTextDocument("! B3LYP def2-TZVP")
         server.workspace.get_text_document.return_value = mock_doc
 
@@ -307,7 +307,11 @@ class TestCodeActionBehavior:
 
         actions = server._on_code_action(params)
         assert isinstance(actions, list)
-        assert len(actions) == 0
+        # No diagnostic-specific fix, but general actions (e.g. add %maxcore) may be present.
+        # None of the actions should be tied to the unrecognized diagnostic.
+        for action in actions:
+            if action.diagnostics:
+                assert diagnostic not in action.diagnostics
 
 
 class TestDocumentEvents:
