@@ -50,6 +50,7 @@ _DIAGNOSTIC_LINE_END_CHARACTER = 100
 # Regex for extracting %block name from a line (O(1) lookup vs O(n*m) loop)
 _PERCENT_BLOCK_NAME_RE = re.compile(r"%\s*(\w+)", re.IGNORECASE)
 
+
 class ORCALanguageServer(LanguageServer):
     """ORCA Language Server"""
 
@@ -219,12 +220,11 @@ class ORCALanguageServer(LanguageServer):
             if item.detail:
                 item.detail = f"DFT: {item.detail}"
         completions.extend(
-            self._create_completions(
-                WAVEFUNCTION_METHODS, CompletionItemKind.Method, "type"
-            )
+            self._create_completions(WAVEFUNCTION_METHODS, CompletionItemKind.Method, "type")
         )
         # Wavefunction methods get a fixed detail label
-        for item in completions[len(completions) - len(WAVEFUNCTION_METHODS) :]:
+        wavefunction_start = len(completions) - len(WAVEFUNCTION_METHODS)
+        for item in completions[wavefunction_start:]:
             item.detail = "Wavefunction method"
         return completions
 
@@ -311,9 +311,7 @@ class ORCALanguageServer(LanguageServer):
         return str(line[start:end])
 
     @staticmethod
-    def _create_diagnostic(
-        item: dict, severity: DiagnosticSeverity
-    ) -> Diagnostic:
+    def _create_diagnostic(item: dict, severity: DiagnosticSeverity) -> Diagnostic:
         """Create an LSP Diagnostic from a parsed error/warning item."""
         line = item.get("line", 0)
         return Diagnostic(
@@ -336,8 +334,7 @@ class ORCALanguageServer(LanguageServer):
 
         # Convert to LSP diagnostics
         diagnostics: List[Diagnostic] = [
-            self._create_diagnostic(error, DiagnosticSeverity.Error)
-            for error in result.errors
+            self._create_diagnostic(error, DiagnosticSeverity.Error) for error in result.errors
         ]
         diagnostics.extend(
             self._create_diagnostic(warning, DiagnosticSeverity.Warning)

@@ -64,7 +64,7 @@ jobs:
         run: |
           flake8 src tests/test_chemistry_validation.py tests/test_metadata.py \
             --max-line-length=100 \
-            --extend-ignore=E501
+            --extend-ignore=E501,E203
 
       - name: Type check
         run: mypy src
