@@ -16,6 +16,8 @@ from lsprotocol.types import (
     DiagnosticSeverity,
     DidChangeTextDocumentParams,
     DidOpenTextDocumentParams,
+    DocumentFormattingParams,
+    DocumentRangeFormattingParams,
     Hover,
     HoverParams,
     Location,
@@ -43,12 +45,14 @@ from .keywords import (
 )
 from .features.code_actions import CodeActionProvider
 from .features.diagnostic import DiagnosticProvider
+from .features.formatting import FormattingProvider
 from .features.lint import LintProvider
 from .features.navigation import (
     DefinitionProvider,
     HoverProvider,
     ReferencesProvider,
 )
+from .features.typecheck import TypecheckProvider
 from .parser import ORCAParser
 
 # Pre-sorted elements for completions (avoid sorting on every request)
@@ -69,11 +73,13 @@ class ORCALanguageServer(LanguageServer):
         super().__init__("orca-lsp", __version__)
         self.parser = parser if parser is not None else ORCAParser()
         self.diagnostic_provider = DiagnosticProvider(self.parser)
+        self.formatting_provider = FormattingProvider(self)
         self.lint_provider = LintProvider(self.parser)
         self.code_action_provider = CodeActionProvider(self.parser)
         self.definition_provider = DefinitionProvider(self.parser)
         self.hover_provider = HoverProvider(self.parser)
         self.references_provider = ReferencesProvider(self.parser)
+        self.typecheck_provider = TypecheckProvider(self.parser)
         self._setup_features()
 
     def _setup_features(self) -> None:
@@ -106,6 +112,16 @@ class ORCALanguageServer(LanguageServer):
         @self.feature("textDocument/didChange")
         def on_did_change(params: DidChangeTextDocumentParams) -> None:
             self._on_did_change(params)  # pragma: no cover
+
+        @self.feature("textDocument/formatting")
+        def on_formatting(params: DocumentFormattingParams) -> List[TextEdit]:
+            return self._on_formatting(params)  # pragma: no cover
+
+        @self.feature("textDocument/rangeFormatting")
+        def on_range_formatting(
+            params: DocumentRangeFormattingParams,
+        ) -> List[TextEdit]:
+            return self._on_range_formatting(params)  # pragma: no cover
 
     def _on_completion(self, params: CompletionParams) -> Optional[CompletionList]:
         """Handle completion requests"""
@@ -337,6 +353,9 @@ class ORCALanguageServer(LanguageServer):
         # Merge lint diagnostics (schema-aware static checks)
         diagnostics.extend(self.lint_provider.lint(content))
 
+        # Merge typecheck diagnostics (value types, enums, units, required sections)
+        diagnostics.extend(self.typecheck_provider.typecheck(content))
+
         # Publish diagnostics
         self.publish_diagnostics(uri, diagnostics)
 
@@ -362,6 +381,18 @@ class ORCALanguageServer(LanguageServer):
                 action.edit.changes = new_changes
 
         return actions
+
+    def _on_formatting(self, params: DocumentFormattingParams) -> List[TextEdit]:
+        """Handle document formatting requests."""
+        document = self.workspace.get_text_document(params.text_document.uri)
+        return self.formatting_provider.format_document(document.source, params)
+
+    def _on_range_formatting(
+        self, params: DocumentRangeFormattingParams
+    ) -> List[TextEdit]:
+        """Handle range formatting requests."""
+        document = self.workspace.get_text_document(params.text_document.uri)
+        return self.formatting_provider.format_range(document.source, params)
 
     def _on_did_open(self, params: DidOpenTextDocumentParams) -> None:
         """Handle document open"""
