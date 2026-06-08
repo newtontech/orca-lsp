@@ -40,6 +40,7 @@ from .keywords import (
 )
 from .features.diagnostic import DiagnosticProvider
 from .features.lint import LintProvider
+from .features.typecheck import TypecheckProvider
 from .parser import ORCAParser
 
 # Pre-sorted elements for completions (avoid sorting on every request)
@@ -61,6 +62,7 @@ class ORCALanguageServer(LanguageServer):
         self.parser = parser if parser is not None else ORCAParser()
         self.diagnostic_provider = DiagnosticProvider(self.parser)
         self.lint_provider = LintProvider(self.parser)
+        self.typecheck_provider = TypecheckProvider(self.parser)
         self._setup_features()
 
     def _setup_features(self) -> None:
@@ -338,6 +340,9 @@ class ORCALanguageServer(LanguageServer):
 
         # Merge lint diagnostics (schema-aware static checks)
         diagnostics.extend(self.lint_provider.lint(content))
+
+        # Merge typecheck diagnostics (value types, enums, units, required sections)
+        diagnostics.extend(self.typecheck_provider.typecheck(content))
 
         # Publish diagnostics
         self.publish_diagnostics(uri, diagnostics)
