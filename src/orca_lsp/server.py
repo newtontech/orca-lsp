@@ -223,7 +223,8 @@ class ORCALanguageServer(LanguageServer):
             self._create_completions(WAVEFUNCTION_METHODS, CompletionItemKind.Method, "type")
         )
         # Wavefunction methods get a fixed detail label
-        for item in completions[len(completions) - len(WAVEFUNCTION_METHODS) :]:
+        wavefunction_start = len(completions) - len(WAVEFUNCTION_METHODS)
+        for item in completions[wavefunction_start:]:
             item.detail = "Wavefunction method"
         return completions
 
