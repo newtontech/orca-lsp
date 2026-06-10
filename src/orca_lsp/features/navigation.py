@@ -12,7 +12,7 @@ Supports navigation to/from:
 from __future__ import annotations
 
 import re
-from typing import List, Optional
+from typing import List, Mapping, Optional
 
 from lsprotocol.types import (
     Hover,
@@ -208,7 +208,7 @@ class HoverProvider:
 
         # Build case-insensitive lookup maps for keyword dictionaries with
         # mixed-case keys (e.g. "def2-TZVP", "6-31G*", "OPT FREQ").
-        def _ci_lookup(word_upper: str, mapping: dict) -> Optional[str]:
+        def _ci_lookup(word_upper: str, mapping: Mapping[str, object]) -> Optional[str]:
             """Return the canonical key for *word_upper* or None."""
             if word_upper in mapping:
                 return word_upper
