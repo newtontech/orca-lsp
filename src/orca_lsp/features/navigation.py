@@ -221,7 +221,11 @@ class HoverProvider:
         canon = _ci_lookup(word_upper, DFT_FUNCTIONALS)
         if canon is not None:
             info = DFT_FUNCTIONALS[canon]
-            desc = info.get("description", "Density functional method") if isinstance(info, dict) else str(info)
+            desc = (
+                info.get("description", "Density functional method")
+                if isinstance(info, dict)
+                else str(info)
+            )
             return Hover(
                 contents=MarkupContent(
                     kind=MarkupKind.Markdown, value=f"**{canon}** (DFT Functional)\n\n{desc}"
@@ -236,7 +240,11 @@ class HoverProvider:
         canon = _ci_lookup(word_upper, WAVEFUNCTION_METHODS)
         if canon is not None:
             method_info = WAVEFUNCTION_METHODS[canon]
-            desc = method_info.get("description", "Electronic structure method") if isinstance(method_info, dict) else str(method_info)
+            desc = (
+                method_info.get("description", "Electronic structure method")
+                if isinstance(method_info, dict)
+                else str(method_info)
+            )
             return Hover(
                 contents=MarkupContent(
                     kind=MarkupKind.Markdown, value=f"**{canon}** (Wavefunction Method)\n\n{desc}"
