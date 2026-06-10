@@ -188,15 +188,15 @@ class DiagnosticProvider:
         Returns:
             Lowercase severity name.
         """
-        mapping = {
-            DiagnosticSeverity.Error: "error",
-            DiagnosticSeverity.Warning: "warning",
-            DiagnosticSeverity.Information: "information",
-            DiagnosticSeverity.Hint: "hint",
-        }
         if severity is None:
             return "error"
-        return mapping.get(severity, "error")
+        if severity == DiagnosticSeverity.Warning:
+            return "warning"
+        if severity == DiagnosticSeverity.Information:
+            return "information"
+        if severity == DiagnosticSeverity.Hint:
+            return "hint"
+        return "error"
 
 
 __all__ = ["DiagnosticProvider"]
