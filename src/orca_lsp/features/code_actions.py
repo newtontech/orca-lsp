@@ -207,7 +207,9 @@ class CodeActionProvider:
     # ------------------------------------------------------------------
 
     def _fix_unknown_token(
-        self, source: str, diagnostic: Diagnostic,
+        self,
+        source: str,
+        diagnostic: Diagnostic,
     ) -> Optional[CodeAction]:
         """Suggest replacement for unknown token in simple input."""
         unknown = self._extract_quoted_token(diagnostic.message)
@@ -246,7 +248,9 @@ class CodeActionProvider:
         )
 
     def _fix_unknown_block(
-        self, source: str, diagnostic: Diagnostic,
+        self,
+        source: str,
+        diagnostic: Diagnostic,
     ) -> Optional[CodeAction]:
         """Suggest replacement for unknown % block name."""
         block_name = self._extract_block_name(diagnostic.message)
@@ -282,7 +286,9 @@ class CodeActionProvider:
         )
 
     def _fix_unclosed_block(
-        self, source: str, diagnostic: Diagnostic,
+        self,
+        source: str,
+        diagnostic: Diagnostic,
     ) -> Optional[CodeAction]:
         """Add 'end' to close an unclosed % block."""
         lines = source.split("\n")
@@ -324,7 +330,9 @@ class CodeActionProvider:
         )
 
     def _fix_duplicate_block(
-        self, source: str, diagnostic: Diagnostic,
+        self,
+        source: str,
+        diagnostic: Diagnostic,
     ) -> Optional[CodeAction]:
         """Remove a duplicate % block."""
         lines = source.split("\n")
@@ -369,7 +377,9 @@ class CodeActionProvider:
         )
 
     def _fix_missing_maxcore(
-        self, source: str, diagnostic: Diagnostic,
+        self,
+        source: str,
+        diagnostic: Diagnostic,
     ) -> Optional[CodeAction]:
         """Add %maxcore with a recommended default value."""
         lines = source.split("\n")
@@ -399,7 +409,9 @@ class CodeActionProvider:
         )
 
     def _fix_duplicate_token(
-        self, source: str, diagnostic: Diagnostic,
+        self,
+        source: str,
+        diagnostic: Diagnostic,
     ) -> Optional[CodeAction]:
         """Remove a duplicate token in the simple input line."""
         diag_range = diagnostic.range
@@ -439,7 +451,9 @@ class CodeActionProvider:
         )
 
     def _fix_missing_section(
-        self, source: str, diagnostic: Diagnostic,
+        self,
+        source: str,
+        diagnostic: Diagnostic,
     ) -> Optional[CodeAction]:
         """Add a missing section stub (simple input or geometry)."""
         message = diagnostic.message.lower()
@@ -453,7 +467,9 @@ class CodeActionProvider:
         return None
 
     def _add_simple_input_stub(
-        self, source: str, diagnostic: Diagnostic,
+        self,
+        source: str,
+        diagnostic: Diagnostic,
     ) -> CodeAction:
         """Add a simple input line stub."""
         insert_pos = Position(line=0, character=0)
@@ -474,7 +490,9 @@ class CodeActionProvider:
         )
 
     def _add_geometry_stub(
-        self, source: str, diagnostic: Diagnostic,
+        self,
+        source: str,
+        diagnostic: Diagnostic,
     ) -> CodeAction:
         """Add a geometry section stub."""
         lines = source.split("\n")

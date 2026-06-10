@@ -8,7 +8,6 @@ completion, hover, and formatting stay consistent.
 from __future__ import annotations
 
 import json
-from dataclasses import asdict
 from typing import Any, Dict, List, Optional
 
 from lsprotocol.types import (
@@ -150,9 +149,7 @@ class DiagnosticProvider:
             diagnostics.append(self._item_to_diagnostic(item, DiagnosticSeverity.Error))
 
         for item in result.warnings:
-            diagnostics.append(
-                self._item_to_diagnostic(item, DiagnosticSeverity.Warning)
-            )
+            diagnostics.append(self._item_to_diagnostic(item, DiagnosticSeverity.Warning))
 
         return diagnostics
 
@@ -191,15 +188,15 @@ class DiagnosticProvider:
         Returns:
             Lowercase severity name.
         """
-        mapping = {
-            DiagnosticSeverity.Error: "error",
-            DiagnosticSeverity.Warning: "warning",
-            DiagnosticSeverity.Information: "information",
-            DiagnosticSeverity.Hint: "hint",
-        }
         if severity is None:
             return "error"
-        return mapping.get(severity, "error")
+        if severity == DiagnosticSeverity.Warning:
+            return "warning"
+        if severity == DiagnosticSeverity.Information:
+            return "information"
+        if severity == DiagnosticSeverity.Hint:
+            return "hint"
+        return "error"
 
 
 __all__ = ["DiagnosticProvider"]

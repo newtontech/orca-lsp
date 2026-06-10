@@ -25,10 +25,7 @@ from lsprotocol.types import (
 
 from ..parser import (
     ORCAParser,
-    ParseResult,
-    PercentBlock,
 )
-
 
 # ------------------------------------------------------------------
 # Helpers
@@ -59,6 +56,7 @@ def _position_in_range(pos: Position, rng: Range) -> bool:
 # ------------------------------------------------------------------
 # DefinitionProvider
 # ------------------------------------------------------------------
+
 
 class DefinitionProvider:
     """Provides go-to-definition for ORCA input files."""
@@ -129,7 +127,11 @@ class DefinitionProvider:
             if stripped.startswith("end") and i > current_block_start:
                 break
             for m in _WORD_RE.finditer(lines[i]):
-                if m.group().lower() == word_lower and m.start() < lines[i].lstrip().find(" ") if " " in lines[i].lstrip() else True:
+                if (
+                    m.group().lower() == word_lower and m.start() < lines[i].lstrip().find(" ")
+                    if " " in lines[i].lstrip()
+                    else True
+                ):
                     return Location(
                         uri="",
                         range=Range(
@@ -176,6 +178,7 @@ class DefinitionProvider:
 # HoverProvider
 # ------------------------------------------------------------------
 
+
 class HoverProvider:
     """Provides hover information for ORCA input files."""
 
@@ -194,14 +197,13 @@ class HoverProvider:
             return None
 
         word_upper = word.upper()
-        word_lower = word.lower()
 
         # Check keywords.py for documentation
         from ..keywords import (
-            DFT_FUNCTIONALS,
-            WAVEFUNCTION_METHODS,
             BASIS_SETS,
+            DFT_FUNCTIONALS,
             JOB_TYPES,
+            WAVEFUNCTION_METHODS,
         )
 
         # Check DFT functionals
@@ -209,7 +211,9 @@ class HoverProvider:
             info = DFT_FUNCTIONALS[word_upper]
             desc = info if isinstance(info, str) else "Density functional method"
             return Hover(
-                contents=MarkupContent(kind=MarkupKind.Markdown, value=f"**{word}** (DFT Functional)\n\n{desc}"),
+                contents=MarkupContent(
+                    kind=MarkupKind.Markdown, value=f"**{word}** (DFT Functional)\n\n{desc}"
+                ),
                 range=Range(
                     start=Position(line=position.line, character=0),
                     end=Position(line=position.line, character=len(line)),
@@ -218,9 +222,12 @@ class HoverProvider:
 
         # Check wavefunction methods
         if word_upper in WAVEFUNCTION_METHODS:
-            desc = WAVEFUNCTION_METHODS.get(word_upper, "Electronic structure method")
+            method_info = WAVEFUNCTION_METHODS.get(word_upper, "Electronic structure method")
+            desc = method_info if isinstance(method_info, str) else "Electronic structure method"
             return Hover(
-                contents=MarkupContent(kind=MarkupKind.Markdown, value=f"**{word}** (Wavefunction Method)\n\n{desc}"),
+                contents=MarkupContent(
+                    kind=MarkupKind.Markdown, value=f"**{word}** (Wavefunction Method)\n\n{desc}"
+                ),
                 range=Range(
                     start=Position(line=position.line, character=0),
                     end=Position(line=position.line, character=len(line)),
@@ -230,7 +237,10 @@ class HoverProvider:
         # Check job types
         if word_upper in JOB_TYPES:
             return Hover(
-                contents=MarkupContent(kind=MarkupKind.Markdown, value=f"**{word}** (Job Type)\n\n{JOB_TYPES[word_upper]}"),
+                contents=MarkupContent(
+                    kind=MarkupKind.Markdown,
+                    value=f"**{word}** (Job Type)\n\n{JOB_TYPES[word_upper]}",
+                ),
                 range=Range(
                     start=Position(line=position.line, character=0),
                     end=Position(line=position.line, character=len(line)),
@@ -240,7 +250,10 @@ class HoverProvider:
         # Check basis sets
         if word_upper in BASIS_SETS:
             return Hover(
-                contents=MarkupContent(kind=MarkupKind.Markdown, value=f"**{word}** (Basis Set)\n\n{BASIS_SETS[word_upper]}"),
+                contents=MarkupContent(
+                    kind=MarkupKind.Markdown,
+                    value=f"**{word}** (Basis Set)\n\n{BASIS_SETS[word_upper]}",
+                ),
                 range=Range(
                     start=Position(line=position.line, character=0),
                     end=Position(line=position.line, character=len(line)),
@@ -273,7 +286,10 @@ class HoverProvider:
             }
             if block_name in descriptions:
                 return Hover(
-                    contents=MarkupContent(kind=MarkupKind.Markdown, value=f"**%{block_name}**\n\n{descriptions[block_name]}"),
+                    contents=MarkupContent(
+                        kind=MarkupKind.Markdown,
+                        value=f"**%{block_name}**\n\n{descriptions[block_name]}",
+                    ),
                     range=Range(
                         start=Position(line=position.line, character=0),
                         end=Position(line=position.line, character=len(line)),
@@ -286,6 +302,7 @@ class HoverProvider:
 # ------------------------------------------------------------------
 # ReferencesProvider
 # ------------------------------------------------------------------
+
 
 class ReferencesProvider:
     """Provides find-references for ORCA input files."""
@@ -318,7 +335,11 @@ class ReferencesProvider:
             for m in _WORD_RE.finditer(l):
                 if m.group().lower() == word_lower:
                     # Exact case-insensitive match
-                    if not include_declaration and i == position.line and m.start() == position.character:
+                    if (
+                        not include_declaration
+                        and i == position.line
+                        and m.start() == position.character
+                    ):
                         continue
                     locations.append(
                         Location(

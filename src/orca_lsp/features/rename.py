@@ -161,9 +161,7 @@ def _is_valid_new_name(name: str) -> bool:
     return bool(re.match(r"^[A-Za-z_][\w\-\.\(\)]*$", name))
 
 
-def _collect_block_name_occurrences(
-    text: str, block_name: str
-) -> List[SymbolOccurrence]:
+def _collect_block_name_occurrences(text: str, block_name: str) -> List[SymbolOccurrence]:
     """Find every occurrence of a ``%`` block name in *text*."""
     occurrences: List[SymbolOccurrence] = []
     name_lower = block_name.lower()
@@ -190,9 +188,7 @@ def _collect_block_name_occurrences(
     return occurrences
 
 
-def _collect_simple_input_keyword_occurrences(
-    text: str, keyword: str
-) -> List[SymbolOccurrence]:
+def _collect_simple_input_keyword_occurrences(text: str, keyword: str) -> List[SymbolOccurrence]:
     """Find every occurrence of a keyword in ``!`` simple-input lines."""
     occurrences: List[SymbolOccurrence] = []
     lines = text.split("\n")
@@ -236,9 +232,7 @@ def _collect_simple_input_keyword_occurrences(
     return occurrences
 
 
-def _collect_block_param_occurrences(
-    text: str, param_name: str
-) -> List[SymbolOccurrence]:
+def _collect_block_param_occurrences(text: str, param_name: str) -> List[SymbolOccurrence]:
     """Find every occurrence of a ``%`` block parameter in *text*."""
     occurrences: List[SymbolOccurrence] = []
     param_lower = param_name.lower()
@@ -261,9 +255,7 @@ def _collect_block_param_occurrences(
                 in_block = False
 
             # Scan for the parameter on the % header line itself
-            _scan_line_for_param(
-                occurrences, line_idx, line, stripped, param_lower
-            )
+            _scan_line_for_param(occurrences, line_idx, line, stripped, param_lower)
             continue
 
         if in_block:
@@ -271,9 +263,7 @@ def _collect_block_param_occurrences(
                 in_block = False
                 continue
 
-            _scan_line_for_param(
-                occurrences, line_idx, line, stripped, param_lower
-            )
+            _scan_line_for_param(occurrences, line_idx, line, stripped, param_lower)
 
     return occurrences
 
@@ -286,9 +276,7 @@ def _scan_line_for_param(
     param_lower: str,
 ) -> None:
     """Scan a single line for a parameter keyword match and append occurrences."""
-    for m in re.finditer(
-        r"\b(" + re.escape(param_lower) + r")\b", stripped, re.IGNORECASE
-    ):
+    for m in re.finditer(r"\b(" + re.escape(param_lower) + r")\b", stripped, re.IGNORECASE):
         if m.group(1).lower() == param_lower:
             # Map match position back to the original (unstripped) line
             line_offset = len(line) - len(line.lstrip())
@@ -301,8 +289,6 @@ def _scan_line_for_param(
                     kind="block_param",
                 )
             )
-
-    return occurrences
 
 
 # ---------------------------------------------------------------------------
