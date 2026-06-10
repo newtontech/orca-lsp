@@ -8,7 +8,6 @@ completion, hover, and formatting stay consistent.
 from __future__ import annotations
 
 import json
-from dataclasses import asdict
 from typing import Any, Dict, List, Optional
 
 from lsprotocol.types import (
@@ -150,9 +149,7 @@ class DiagnosticProvider:
             diagnostics.append(self._item_to_diagnostic(item, DiagnosticSeverity.Error))
 
         for item in result.warnings:
-            diagnostics.append(
-                self._item_to_diagnostic(item, DiagnosticSeverity.Warning)
-            )
+            diagnostics.append(self._item_to_diagnostic(item, DiagnosticSeverity.Warning))
 
         return diagnostics
 

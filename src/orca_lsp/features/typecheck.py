@@ -34,7 +34,6 @@ from ..keywords import (
     BASIS_SETS,
     DFT_FUNCTIONALS,
     JOB_TYPES,
-    PERCENT_BLOCKS,
     WAVEFUNCTION_METHODS,
 )
 from ..parser import ORCAParser, ParseResult, PercentBlock
@@ -176,9 +175,7 @@ _VALID_UNITS: Dict[str, Dict[str, Set[str]]] = {
 }
 
 # Enum validation sets for simple-input keywords (case-insensitive check)
-_METHOD_ENUM: Set[str] = (
-    set(DFT_FUNCTIONALS.keys()) | set(WAVEFUNCTION_METHODS.keys())
-)
+_METHOD_ENUM: Set[str] = set(DFT_FUNCTIONALS.keys()) | set(WAVEFUNCTION_METHODS.keys())
 _METHOD_ENUM_UPPER: Set[str] = {m.upper() for m in _METHOD_ENUM}
 
 _BASIS_ENUM_UPPER: Set[str] = {b.upper() for b in BASIS_SETS.keys()}
@@ -190,27 +187,48 @@ _DISPERSION_ENUM_UPPER: Set[str] = {"D3", "D3BJ", "D4"}
 _SOLVENT_ENUM_UPPER: Set[str] = {"CPCM", "SMD"}
 
 _SCF_CONV_ENUM_UPPER: Set[str] = {
-    "TIGHTSCF", "LOOSESCF", "VERYTIGHTSCF", "SLOPPYSCF", "NORMALSCF",
+    "TIGHTSCF",
+    "LOOSESCF",
+    "VERYTIGHTSCF",
+    "SLOPPYSCF",
+    "NORMALSCF",
 }
 
 _BOOLEAN_STRINGS: Set[str] = {"true", "false", "1", "0", "yes", "no"}
 
 # All known simple-input modifiers (not in method/basis/job dictionaries)
 _KNOWN_MODIFIERS_UPPER: Set[str] = {
-    "RIJCOSX", "RI-J", "GRID3", "GRID4", "GRID5",
-    "FINALGRID4", "FINALGRID5", "FINALGRID6",
-    "DEFGRID2", "DEFGRID3", "NOITER",
-    "PRINTLEVEL", "MOREAD", "KEEPDENS", "KEEPMOS",
-    "MINIPRINT", "LARGEPRINT", "NOPRINT",
-    "DFT", "RKS", "UKS", "ROKS",
-    "ZORA", "DKH",
-    "RHF", "UHF", "ROHF",
+    "RIJCOSX",
+    "RI-J",
+    "GRID3",
+    "GRID4",
+    "GRID5",
+    "FINALGRID4",
+    "FINALGRID5",
+    "FINALGRID6",
+    "DEFGRID2",
+    "DEFGRID3",
+    "NOITER",
+    "PRINTLEVEL",
+    "MOREAD",
+    "KEEPDENS",
+    "KEEPMOS",
+    "MINIPRINT",
+    "LARGEPRINT",
+    "NOPRINT",
+    "DFT",
+    "RKS",
+    "UKS",
+    "ROKS",
+    "ZORA",
+    "DKH",
+    "RHF",
+    "UHF",
+    "ROHF",
 }
 
 # Regex for extracting block parameter assignments
-_PARAM_ASSIGNMENT_RE = re.compile(
-    r"^\s*(\w+)\s+(.+?)(?:\s+#.*)?$", re.IGNORECASE
-)
+_PARAM_ASSIGNMENT_RE = re.compile(r"^\s*(\w+)\s+(.+?)(?:\s+#.*)?$", re.IGNORECASE)
 
 # Regex for matching a unit suffix like "MB", "GB", "K", "fs", "ps"
 _UNIT_SUFFIX_RE = re.compile(r"^(-?[\d.]+)\s*([A-Za-z]+)$")
@@ -344,14 +362,9 @@ class TypecheckProvider:
                     Diagnostic(
                         range=Range(
                             start=Position(line=line_idx, character=col),
-                            end=Position(
-                                line=line_idx, character=col + len(token)
-                            ),
+                            end=Position(line=line_idx, character=col + len(token)),
                         ),
-                        message=(
-                            f"Unknown keyword '{token}'. "
-                            f"Did you mean '{suggestion}'?"
-                        ),
+                        message=(f"Unknown keyword '{token}'. " f"Did you mean '{suggestion}'?"),
                         severity=DiagnosticSeverity.Error,
                         source="orca-lsp-typecheck",
                         code=RULE_INVALID_ENUM,
@@ -368,9 +381,7 @@ class TypecheckProvider:
             Best matching known keyword if close enough, else None.
         """
         candidates: List[Tuple[int, str]] = []
-        all_known = (
-            _METHOD_ENUM_UPPER | _BASIS_ENUM_UPPER | _JOB_TYPE_ENUM_UPPER
-        )
+        all_known = _METHOD_ENUM_UPPER | _BASIS_ENUM_UPPER | _JOB_TYPE_ENUM_UPPER
         for known in all_known:
             dist = self._levenshtein(token_upper, known)
             if dist <= max(2, len(token_upper) // 3):
@@ -440,7 +451,11 @@ class TypecheckProvider:
             # Check if this is a single-line value block (e.g. %maxcore 4000)
             first_line = block.raw_content.split("\n")[0].strip()
             self._check_single_line_block(
-                block, first_line, schema, lines, diagnostics,
+                block,
+                first_line,
+                schema,
+                lines,
+                diagnostics,
             )
 
             # Check multi-line content (lines not starting with %)
@@ -464,6 +479,8 @@ class TypecheckProvider:
                     continue
 
                 expected_type = param_schema.get("type")
+                if not isinstance(expected_type, str):
+                    continue
                 abs_line_idx = block.line_start + rel_line_idx
 
                 self._validate_param_value(
@@ -516,7 +533,7 @@ class TypecheckProvider:
             # Single value -- look for the first schema param
             for param_name, param_schema in schema.items():
                 expected_type = param_schema.get("type")
-                if expected_type in ("int", "float"):
+                if isinstance(expected_type, str) and expected_type in ("int", "float"):
                     self._validate_param_value(
                         param_name,
                         parts[0],
@@ -533,13 +550,15 @@ class TypecheckProvider:
             param_name_raw = parts[0]
             param_value_raw = parts[1].strip()
             param_name_lower = param_name_raw.lower()
-            param_schema = schema.get(param_name_lower)
-            if param_schema is not None:
-                expected_type = param_schema.get("type")
+            inline_param_schema = schema.get(param_name_lower)
+            if inline_param_schema is not None:
+                expected_type = inline_param_schema.get("type")
+                if not isinstance(expected_type, str):
+                    return
                 self._validate_param_value(
                     param_name_raw,
                     param_value_raw,
-                    param_schema,
+                    inline_param_schema,
                     expected_type,
                     block.line_start,
                     block.name,
@@ -591,23 +610,44 @@ class TypecheckProvider:
 
         if expected_type == "int":
             self._validate_int(
-                param_value, param_name, schema, line_idx, col,
-                val_end_col, block_name, diagnostics,
+                param_value,
+                param_name,
+                schema,
+                line_idx,
+                col,
+                val_end_col,
+                block_name,
+                diagnostics,
             )
         elif expected_type == "float":
             self._validate_float(
-                param_value, param_name, schema, line_idx, col,
-                val_end_col, block_name, diagnostics,
+                param_value,
+                param_name,
+                schema,
+                line_idx,
+                col,
+                val_end_col,
+                block_name,
+                diagnostics,
             )
         elif expected_type == "bool":
             self._validate_bool(
-                param_value, param_name, line_idx, col,
-                val_end_col, diagnostics,
+                param_value,
+                param_name,
+                line_idx,
+                col,
+                val_end_col,
+                diagnostics,
             )
         elif expected_type == "enum":
             self._validate_enum(
-                param_value, param_name, schema, line_idx, col,
-                val_end_col, diagnostics,
+                param_value,
+                param_name,
+                schema,
+                line_idx,
+                col,
+                val_end_col,
+                diagnostics,
             )
 
     def _validate_int(
@@ -645,8 +685,7 @@ class TypecheckProvider:
                         end=Position(line=line_idx, character=end_col),
                     ),
                     message=(
-                        f"Expected integer for '%{block_name} {param_name}', "
-                        f"got '{value}'"
+                        f"Expected integer for '%{block_name} {param_name}', " f"got '{value}'"
                     ),
                     severity=DiagnosticSeverity.Error,
                     source="orca-lsp-typecheck",
@@ -664,10 +703,7 @@ class TypecheckProvider:
                         start=Position(line=line_idx, character=col),
                         end=Position(line=line_idx, character=end_col),
                     ),
-                    message=(
-                        f"Value {int_val} for '{param_name}' is below "
-                        f"minimum {min_val}"
-                    ),
+                    message=(f"Value {int_val} for '{param_name}' is below " f"minimum {min_val}"),
                     severity=DiagnosticSeverity.Warning,
                     source="orca-lsp-typecheck",
                     code=RULE_NON_NUMERIC,
@@ -680,10 +716,7 @@ class TypecheckProvider:
                         start=Position(line=line_idx, character=col),
                         end=Position(line=line_idx, character=end_col),
                     ),
-                    message=(
-                        f"Value {int_val} for '{param_name}' is above "
-                        f"maximum {max_val}"
-                    ),
+                    message=(f"Value {int_val} for '{param_name}' is above " f"maximum {max_val}"),
                     severity=DiagnosticSeverity.Warning,
                     source="orca-lsp-typecheck",
                     code=RULE_NON_NUMERIC,
@@ -724,8 +757,7 @@ class TypecheckProvider:
                         end=Position(line=line_idx, character=end_col),
                     ),
                     message=(
-                        f"Expected number for '%{block_name} {param_name}', "
-                        f"got '{value}'"
+                        f"Expected number for '%{block_name} {param_name}', " f"got '{value}'"
                     ),
                     severity=DiagnosticSeverity.Error,
                     source="orca-lsp-typecheck",
@@ -744,8 +776,7 @@ class TypecheckProvider:
                         end=Position(line=line_idx, character=end_col),
                     ),
                     message=(
-                        f"Value {float_val} for '{param_name}' is below "
-                        f"minimum {min_val}"
+                        f"Value {float_val} for '{param_name}' is below " f"minimum {min_val}"
                     ),
                     severity=DiagnosticSeverity.Warning,
                     source="orca-lsp-typecheck",
@@ -760,8 +791,7 @@ class TypecheckProvider:
                         end=Position(line=line_idx, character=end_col),
                     ),
                     message=(
-                        f"Value {float_val} for '{param_name}' is above "
-                        f"maximum {max_val}"
+                        f"Value {float_val} for '{param_name}' is above " f"maximum {max_val}"
                     ),
                     severity=DiagnosticSeverity.Warning,
                     source="orca-lsp-typecheck",
@@ -796,8 +826,7 @@ class TypecheckProvider:
                         end=Position(line=line_idx, character=end_col),
                     ),
                     message=(
-                        f"Expected boolean (true/false) for '{param_name}', "
-                        f"got '{value}'"
+                        f"Expected boolean (true/false) for '{param_name}', " f"got '{value}'"
                     ),
                     severity=DiagnosticSeverity.Error,
                     source="orca-lsp-typecheck",
@@ -871,7 +900,10 @@ class TypecheckProvider:
 
             # Check single-line blocks (value on % line)
             self._check_single_line_units(
-                block, valid_units, lines, diagnostics,
+                block,
+                valid_units,
+                lines,
+                diagnostics,
             )
 
             # Check multi-line parameter assignments
@@ -894,8 +926,12 @@ class TypecheckProvider:
                     continue
 
                 self._check_unit_value(
-                    param_value_raw, param_name_raw, allowed_units,
-                    block.line_start + rel_line_idx, lines, diagnostics,
+                    param_value_raw,
+                    param_name_raw,
+                    allowed_units,
+                    block.line_start + rel_line_idx,
+                    lines,
+                    diagnostics,
                 )
 
     def _check_single_line_units(
@@ -937,14 +973,17 @@ class TypecheckProvider:
                     unit_str = unit_match.group(2)
                     if unit_str not in allowed_units:
                         col = self._find_value_col(
-                            lines, block.line_start,
-                            block.name, parts[0],
+                            lines,
+                            block.line_start,
+                            block.name,
+                            parts[0],
                         )
                         diagnostics.append(
                             Diagnostic(
                                 range=Range(
                                     start=Position(
-                                        line=block.line_start, character=col,
+                                        line=block.line_start,
+                                        character=col,
                                     ),
                                     end=Position(
                                         line=block.line_start,
@@ -966,11 +1005,15 @@ class TypecheckProvider:
             # Inline param (e.g. %pal nprocs 4)
             param_name_lower = parts[0].lower()
             param_value = parts[1].strip()
-            allowed_units = valid_units.get(param_name_lower)
-            if allowed_units is not None:
+            inline_allowed_units = valid_units.get(param_name_lower)
+            if inline_allowed_units is not None:
                 self._check_unit_value(
-                    param_value, parts[0], allowed_units,
-                    block.line_start, lines, diagnostics,
+                    param_value,
+                    parts[0],
+                    inline_allowed_units,
+                    block.line_start,
+                    lines,
+                    diagnostics,
                 )
 
     def _check_unit_value(
@@ -997,13 +1040,17 @@ class TypecheckProvider:
             unit_str = unit_match.group(2)
             if unit_str not in allowed_units:
                 col = self._find_value_col(
-                    lines, line_idx, param_name, value,
+                    lines,
+                    line_idx,
+                    param_name,
+                    value,
                 )
                 diagnostics.append(
                     Diagnostic(
                         range=Range(
                             start=Position(
-                                line=line_idx, character=col,
+                                line=line_idx,
+                                character=col,
                             ),
                             end=Position(
                                 line=line_idx,
@@ -1053,8 +1100,7 @@ class TypecheckProvider:
                         end=Position(line=0, character=0),
                     ),
                     message=(
-                        "Missing required simple input line "
-                        "(e.g. '! B3LYP def2-TZVP OPT')"
+                        "Missing required simple input line " "(e.g. '! B3LYP def2-TZVP OPT')"
                     ),
                     severity=DiagnosticSeverity.Warning,
                     source="orca-lsp-typecheck",
@@ -1128,8 +1174,7 @@ class TypecheckProvider:
                         ),
                     ),
                     message=(
-                        "Missing required geometry section "
-                        "(e.g. '* xyz 0 1\\n  H 0 0 0\\n*')"
+                        "Missing required geometry section " "(e.g. '* xyz 0 1\\n  H 0 0 0\\n*')"
                     ),
                     severity=DiagnosticSeverity.Warning,
                     source="orca-lsp-typecheck",
@@ -1143,7 +1188,9 @@ class TypecheckProvider:
 
     @staticmethod
     def _strip_unit(
-        value: str, block_name: str, param_name: str,
+        value: str,
+        block_name: str,
+        param_name: str,
     ) -> str:
         """Strip a recognized unit suffix from a value string.
 
@@ -1164,7 +1211,10 @@ class TypecheckProvider:
 
     @staticmethod
     def _find_value_col(
-        lines: List[str], line_idx: int, param_name: str, value: str,
+        lines: List[str],
+        line_idx: int,
+        param_name: str,
+        value: str,
     ) -> int:
         """Find the column position of a parameter value on a line.
 

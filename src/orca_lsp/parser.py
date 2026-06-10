@@ -4,7 +4,13 @@ import re
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
-from .keywords import BASIS_SETS, DFT_FUNCTIONALS, ELEMENTS, JOB_TYPES, WAVEFUNCTION_METHODS
+from .keywords import (
+    BASIS_SETS,
+    DFT_FUNCTIONALS,
+    ELEMENTS,
+    JOB_TYPES,
+    WAVEFUNCTION_METHODS,
+)
 from .validator import ORCAValidator
 
 # Pre-compiled regex patterns for performance (avoid recompilation on every loop)

@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, List, Optional
 
 from lsprotocol.types import (
     CodeAction,
-    CodeActionKind,
     CodeActionParams,
     CompletionItem,
     CompletionItemKind,
@@ -21,13 +20,10 @@ from lsprotocol.types import (
     Hover,
     HoverParams,
     Location,
-    MarkupContent,
-    MarkupKind,
     Position,
     Range,
     ReferenceParams,
     TextEdit,
-    WorkspaceEdit,
 )
 from pygls.server import LanguageServer
 
@@ -35,14 +31,6 @@ if TYPE_CHECKING:
     from pygls.workspace import TextDocument
 
 from . import __version__
-from .keywords import (
-    BASIS_SETS,
-    DFT_FUNCTIONALS,
-    ELEMENTS,
-    JOB_TYPES,
-    PERCENT_BLOCKS,
-    WAVEFUNCTION_METHODS,
-)
 from .features.code_actions import CodeActionProvider
 from .features.diagnostic import DiagnosticProvider
 from .features.formatting import FormattingProvider
@@ -53,6 +41,14 @@ from .features.navigation import (
     ReferencesProvider,
 )
 from .features.typecheck import TypecheckProvider
+from .keywords import (
+    BASIS_SETS,
+    DFT_FUNCTIONALS,
+    ELEMENTS,
+    JOB_TYPES,
+    PERCENT_BLOCKS,
+    WAVEFUNCTION_METHODS,
+)
 from .parser import ORCAParser
 
 # Pre-sorted elements for completions (avoid sorting on every request)
@@ -366,7 +362,8 @@ class ORCALanguageServer(LanguageServer):
 
         # Delegate to the CodeActionProvider
         actions = self.code_action_provider.get_code_actions(
-            source, params.context.diagnostics,
+            source,
+            params.context.diagnostics,
         )
 
         # Rewrite document URI into workspace edit changes (the provider uses
@@ -387,9 +384,7 @@ class ORCALanguageServer(LanguageServer):
         document = self.workspace.get_text_document(params.text_document.uri)
         return self.formatting_provider.format_document(document.source, params)
 
-    def _on_range_formatting(
-        self, params: DocumentRangeFormattingParams
-    ) -> List[TextEdit]:
+    def _on_range_formatting(self, params: DocumentRangeFormattingParams) -> List[TextEdit]:
         """Handle range formatting requests."""
         document = self.workspace.get_text_document(params.text_document.uri)
         return self.formatting_provider.format_range(document.source, params)

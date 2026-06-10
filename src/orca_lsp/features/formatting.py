@@ -7,7 +7,6 @@ preserving comments, semantic content, and section ordering.
 
 from __future__ import annotations
 
-import re
 from typing import List, Optional
 
 from lsprotocol.types import (
@@ -23,9 +22,7 @@ from pygls.server import LanguageServer
 from ..keywords import PERCENT_BLOCKS
 
 # ORCA structural markers that affect indentation depth.
-_PERCENT_BLOCK_NAMES: frozenset[str] = frozenset(
-    name.lower() for name in PERCENT_BLOCKS
-)
+_PERCENT_BLOCK_NAMES: frozenset[str] = frozenset(name.lower() for name in PERCENT_BLOCKS)
 
 
 class FormattingProvider:
@@ -56,9 +53,7 @@ class FormattingProvider:
     # Public API
     # ------------------------------------------------------------------
 
-    def format_document(
-        self, text: str, params: DocumentFormattingParams
-    ) -> List[TextEdit]:
+    def format_document(self, text: str, params: DocumentFormattingParams) -> List[TextEdit]:
         """Format the entire document.
 
         Args:
@@ -93,9 +88,7 @@ class FormattingProvider:
             )
         ]
 
-    def format_range(
-        self, text: str, params: DocumentRangeFormattingParams
-    ) -> List[TextEdit]:
+    def format_range(self, text: str, params: DocumentRangeFormattingParams) -> List[TextEdit]:
         """Format a subrange of the document.
 
         To ensure correct indentation the formatter needs structural

@@ -41,9 +41,7 @@ from lsprotocol.types import (
 
 from ..keywords import (
     ALL_KEYWORDS,
-    DFT_FUNCTIONALS,
     PERCENT_BLOCKS,
-    WAVEFUNCTION_METHODS,
 )
 from ..parser import ORCAParser, ParseResult, PercentBlock
 
@@ -260,9 +258,7 @@ class LintProvider:
                     Diagnostic(
                         range=Range(
                             start=Position(line=line_idx, character=col),
-                            end=Position(
-                                line=line_idx, character=col + len(token)
-                            ),
+                            end=Position(line=line_idx, character=col + len(token)),
                         ),
                         message=f"Unknown token in simple input: '{token}'",
                         severity=DiagnosticSeverity.Error,
@@ -272,22 +268,16 @@ class LintProvider:
                 )
             elif seen[token_upper] > 1:
                 # Only warn for the second and later occurrences.
-                first_idx = next(
-                    j for j, t in enumerate(tokens) if t.upper() == token_upper
-                )
+                first_idx = next(j for j, t in enumerate(tokens) if t.upper() == token_upper)
                 if i != first_idx:
                     col = self._token_column(raw_line, token, i)
                     diagnostics.append(
                         Diagnostic(
                             range=Range(
                                 start=Position(line=line_idx, character=col),
-                                end=Position(
-                                    line=line_idx, character=col + len(token)
-                                ),
+                                end=Position(line=line_idx, character=col + len(token)),
                             ),
-                            message=(
-                                f"Duplicate token in simple input: '{token}'"
-                            ),
+                            message=(f"Duplicate token in simple input: '{token}'"),
                             severity=DiagnosticSeverity.Warning,
                             source="orca-lsp-lint",
                             code=RULE_DUPLICATE_TOKEN,
@@ -345,24 +335,15 @@ class LintProvider:
         reported_duplicates: set[str] = set()
         for block in result.percent_blocks:
             name_lower = block.name.lower()
-            if (
-                seen_blocks.get(name_lower, 0) > 1
-                and name_lower not in reported_duplicates
-            ):
+            if seen_blocks.get(name_lower, 0) > 1 and name_lower not in reported_duplicates:
                 reported_duplicates.add(name_lower)
-                matches = [
-                    b
-                    for b in result.percent_blocks
-                    if b.name.lower() == name_lower
-                ]
+                matches = [b for b in result.percent_blocks if b.name.lower() == name_lower]
                 for dup_block in matches[1:]:
                     col = self._block_name_col(lines, dup_block.line_start)
                     diagnostics.append(
                         Diagnostic(
                             range=Range(
-                                start=Position(
-                                    line=dup_block.line_start, character=col
-                                ),
+                                start=Position(line=dup_block.line_start, character=col),
                                 end=Position(
                                     line=dup_block.line_start,
                                     character=col + len(dup_block.name) + 1,
@@ -404,9 +385,6 @@ class LintProvider:
 
             block_name = match.group(1).lower()
 
-            # Single-line value blocks (e.g. %maxcore 4000) are not multi-line.
-            rest = stripped[match.end():].strip()
-
             # If the line has "end", it's self-closing.
             if _end_re.search(stripped):
                 i += 1
@@ -417,9 +395,7 @@ class LintProvider:
             parts = stripped.split()
             if len(parts) == 2:
                 value = parts[1]
-                if value.isdigit() or (
-                    value.startswith('"') and value.endswith('"')
-                ):
+                if value.isdigit() or (value.startswith('"') and value.endswith('"')):
                     i += 1
                     continue
 
@@ -450,9 +426,7 @@ class LintProvider:
                     Diagnostic(
                         range=Range(
                             start=Position(line=i, character=col),
-                            end=Position(
-                                line=i, character=col + len(block_name) + 1
-                            ),
+                            end=Position(line=i, character=col + len(block_name) + 1),
                         ),
                         message=f"Unclosed % block: '%{block_name}'",
                         severity=DiagnosticSeverity.Error,
@@ -494,9 +468,7 @@ class LintProvider:
                 Diagnostic(
                     range=Range(
                         start=Position(line=line_idx, character=col),
-                        end=Position(
-                            line=line_idx, character=col + len(str(mult))
-                        ),
+                        end=Position(line=line_idx, character=col + len(str(mult))),
                     ),
                     message=f"Multiplicity must be >= 1, got {mult}",
                     severity=DiagnosticSeverity.Error,
@@ -580,14 +552,9 @@ class LintProvider:
                 Diagnostic(
                     range=Range(
                         start=Position(line=line_idx, character=col),
-                        end=Position(
-                            line=line_idx, character=col + len(val_str)
-                        ),
+                        end=Position(line=line_idx, character=col + len(val_str)),
                     ),
-                    message=(
-                        f"SCF maxiter {maxiter} is outside typical range "
-                        f"(10-5000)"
-                    ),
+                    message=(f"SCF maxiter {maxiter} is outside typical range " f"(10-5000)"),
                     severity=DiagnosticSeverity.Warning,
                     source="orca-lsp-lint",
                     code=RULE_MAXITER_RANGE,
@@ -616,13 +583,9 @@ class LintProvider:
                 Diagnostic(
                     range=Range(
                         start=Position(line=line_idx, character=col),
-                        end=Position(
-                            line=line_idx, character=col + len(val_str)
-                        ),
+                        end=Position(line=line_idx, character=col + len(val_str)),
                     ),
-                    message=(
-                        f"nprocs {nprocs} is unusually high (typical max: 256)"
-                    ),
+                    message=(f"nprocs {nprocs} is unusually high (typical max: 256)"),
                     severity=DiagnosticSeverity.Warning,
                     source="orca-lsp-lint",
                     code=RULE_NPROCS_HIGH,
@@ -651,14 +614,9 @@ class LintProvider:
                 Diagnostic(
                     range=Range(
                         start=Position(line=line_idx, character=col),
-                        end=Position(
-                            line=line_idx, character=col + len(val_str)
-                        ),
+                        end=Position(line=line_idx, character=col + len(val_str)),
                     ),
-                    message=(
-                        f"%maxcore {memory} MB is very low "
-                        f"(recommended: 1000-4000)"
-                    ),
+                    message=(f"%maxcore {memory} MB is very low " f"(recommended: 1000-4000)"),
                     severity=DiagnosticSeverity.Warning,
                     source="orca-lsp-lint",
                     code=RULE_MISSING_MAXCORE,
@@ -679,11 +637,7 @@ class LintProvider:
         Returns:
             Deterministic, JSON-safe dictionary.
         """
-        severity_value = (
-            diag.severity
-            if diag.severity is not None
-            else DiagnosticSeverity.Error
-        )
+        severity_value = diag.severity if diag.severity is not None else DiagnosticSeverity.Error
         return {
             "range": {
                 "start": {
@@ -785,15 +739,60 @@ class LintProvider:
             Total electron count, or None if elements are unknown.
         """
         _Z: Dict[str, int] = {
-            "H": 1, "He": 2, "Li": 3, "Be": 4, "B": 5, "C": 6, "N": 7,
-            "O": 8, "F": 9, "Ne": 10, "Na": 11, "Mg": 12, "Al": 13,
-            "Si": 14, "P": 15, "S": 16, "Cl": 17, "Ar": 18, "K": 19,
-            "Ca": 20, "Sc": 21, "Ti": 22, "V": 23, "Cr": 24, "Mn": 25,
-            "Fe": 26, "Co": 27, "Ni": 28, "Cu": 29, "Zn": 30, "Ga": 31,
-            "Ge": 32, "As": 33, "Se": 34, "Br": 35, "Kr": 36, "Rb": 37,
-            "Sr": 38, "Y": 39, "Zr": 40, "Nb": 41, "Mo": 42, "Tc": 43,
-            "Ru": 44, "Rh": 45, "Pd": 46, "Ag": 47, "Cd": 48, "In": 49,
-            "Sn": 50, "Sb": 51, "Te": 52, "I": 53, "Xe": 54,
+            "H": 1,
+            "He": 2,
+            "Li": 3,
+            "Be": 4,
+            "B": 5,
+            "C": 6,
+            "N": 7,
+            "O": 8,
+            "F": 9,
+            "Ne": 10,
+            "Na": 11,
+            "Mg": 12,
+            "Al": 13,
+            "Si": 14,
+            "P": 15,
+            "S": 16,
+            "Cl": 17,
+            "Ar": 18,
+            "K": 19,
+            "Ca": 20,
+            "Sc": 21,
+            "Ti": 22,
+            "V": 23,
+            "Cr": 24,
+            "Mn": 25,
+            "Fe": 26,
+            "Co": 27,
+            "Ni": 28,
+            "Cu": 29,
+            "Zn": 30,
+            "Ga": 31,
+            "Ge": 32,
+            "As": 33,
+            "Se": 34,
+            "Br": 35,
+            "Kr": 36,
+            "Rb": 37,
+            "Sr": 38,
+            "Y": 39,
+            "Zr": 40,
+            "Nb": 41,
+            "Mo": 42,
+            "Tc": 43,
+            "Ru": 44,
+            "Rh": 45,
+            "Pd": 46,
+            "Ag": 47,
+            "Cd": 48,
+            "In": 49,
+            "Sn": 50,
+            "Sb": 51,
+            "Te": 52,
+            "I": 53,
+            "Xe": 54,
         }
 
         total_z = 0
@@ -805,9 +804,7 @@ class LintProvider:
         return total_z - charge
 
     @staticmethod
-    def _find_param_line(
-        block: PercentBlock, param_name: str, lines: List[str]
-    ) -> int:
+    def _find_param_line(block: PercentBlock, param_name: str, lines: List[str]) -> int:
         """Find the line index of a parameter within a block.
 
         Args:
