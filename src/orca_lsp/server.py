@@ -21,9 +21,12 @@ from lsprotocol.types import (
     HoverParams,
     Location,
     Position,
+    PrepareRenameParams,
     Range,
     ReferenceParams,
+    RenameParams,
     TextEdit,
+    WorkspaceEdit,
 )
 from pygls.server import LanguageServer
 
@@ -40,6 +43,7 @@ from .features.navigation import (
     HoverProvider,
     ReferencesProvider,
 )
+from .features.rename import RenameProvider
 from .features.typecheck import TypecheckProvider
 from .keywords import (
     BASIS_SETS,
@@ -76,6 +80,7 @@ class ORCALanguageServer(LanguageServer):
         self.hover_provider = HoverProvider(self.parser)
         self.references_provider = ReferencesProvider(self.parser)
         self.typecheck_provider = TypecheckProvider(self.parser)
+        self.rename_provider = RenameProvider(self.parser)
         self._setup_features()
 
     def _setup_features(self) -> None:
@@ -118,6 +123,16 @@ class ORCALanguageServer(LanguageServer):
             params: DocumentRangeFormattingParams,
         ) -> List[TextEdit]:
             return self._on_range_formatting(params)  # pragma: no cover
+
+        @self.feature("textDocument/prepareRename")
+        def on_prepare_rename(
+            params: PrepareRenameParams,
+        ) -> Optional[Range]:
+            return self._on_prepare_rename(params)  # pragma: no cover
+
+        @self.feature("textDocument/rename")
+        def on_rename(params: RenameParams) -> Optional[WorkspaceEdit]:
+            return self._on_rename(params)  # pragma: no cover
 
     def _on_completion(self, params: CompletionParams) -> Optional[CompletionList]:
         """Handle completion requests"""
@@ -388,6 +403,21 @@ class ORCALanguageServer(LanguageServer):
         """Handle range formatting requests."""
         document = self.workspace.get_text_document(params.text_document.uri)
         return self.formatting_provider.format_range(document.source, params)
+
+    def _on_prepare_rename(self, params: PrepareRenameParams) -> Optional[Range]:
+        """Handle prepare-rename requests via the shared RenameProvider."""
+        document = self.workspace.get_text_document(params.text_document.uri)
+        return self.rename_provider.prepare_rename(document.source, params.position)
+
+    def _on_rename(self, params: RenameParams) -> Optional[WorkspaceEdit]:
+        """Handle rename requests via the shared RenameProvider."""
+        document = self.workspace.get_text_document(params.text_document.uri)
+        return self.rename_provider.get_rename_edits(
+            document.source,
+            params.text_document.uri,
+            params.position,
+            params.new_name,
+        )
 
     def _on_did_open(self, params: DidOpenTextDocumentParams) -> None:
         """Handle document open"""

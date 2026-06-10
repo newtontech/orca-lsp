@@ -31,7 +31,7 @@ from ..parser import (
 # Helpers
 # ------------------------------------------------------------------
 
-_WORD_RE = re.compile(r"[A-Za-z_]\w*")
+_WORD_RE = re.compile(r"[A-Za-z_ωΩ0-9][\w\-.*()]*")
 
 
 def _word_at_line(line: str, char: int) -> str:
@@ -206,13 +206,25 @@ class HoverProvider:
             WAVEFUNCTION_METHODS,
         )
 
+        # Build case-insensitive lookup maps for keyword dictionaries with
+        # mixed-case keys (e.g. "def2-TZVP", "6-31G*", "OPT FREQ").
+        def _ci_lookup(word_upper: str, mapping: dict) -> Optional[str]:
+            """Return the canonical key for *word_upper* or None."""
+            if word_upper in mapping:
+                return word_upper
+            for key in mapping:
+                if key.upper() == word_upper:
+                    return key
+            return None
+
         # Check DFT functionals
-        if word_upper in DFT_FUNCTIONALS:
-            info = DFT_FUNCTIONALS[word_upper]
-            desc = info if isinstance(info, str) else "Density functional method"
+        canon = _ci_lookup(word_upper, DFT_FUNCTIONALS)
+        if canon is not None:
+            info = DFT_FUNCTIONALS[canon]
+            desc = info.get("description", "Density functional method") if isinstance(info, dict) else str(info)
             return Hover(
                 contents=MarkupContent(
-                    kind=MarkupKind.Markdown, value=f"**{word}** (DFT Functional)\n\n{desc}"
+                    kind=MarkupKind.Markdown, value=f"**{canon}** (DFT Functional)\n\n{desc}"
                 ),
                 range=Range(
                     start=Position(line=position.line, character=0),
@@ -221,12 +233,13 @@ class HoverProvider:
             )
 
         # Check wavefunction methods
-        if word_upper in WAVEFUNCTION_METHODS:
-            method_info = WAVEFUNCTION_METHODS.get(word_upper, "Electronic structure method")
-            desc = method_info if isinstance(method_info, str) else "Electronic structure method"
+        canon = _ci_lookup(word_upper, WAVEFUNCTION_METHODS)
+        if canon is not None:
+            method_info = WAVEFUNCTION_METHODS[canon]
+            desc = method_info.get("description", "Electronic structure method") if isinstance(method_info, dict) else str(method_info)
             return Hover(
                 contents=MarkupContent(
-                    kind=MarkupKind.Markdown, value=f"**{word}** (Wavefunction Method)\n\n{desc}"
+                    kind=MarkupKind.Markdown, value=f"**{canon}** (Wavefunction Method)\n\n{desc}"
                 ),
                 range=Range(
                     start=Position(line=position.line, character=0),
@@ -235,11 +248,14 @@ class HoverProvider:
             )
 
         # Check job types
-        if word_upper in JOB_TYPES:
+        canon = _ci_lookup(word_upper, JOB_TYPES)
+        if canon is not None:
+            info = JOB_TYPES[canon]
+            desc = info.get("description", str(info)) if isinstance(info, dict) else str(info)
             return Hover(
                 contents=MarkupContent(
                     kind=MarkupKind.Markdown,
-                    value=f"**{word}** (Job Type)\n\n{JOB_TYPES[word_upper]}",
+                    value=f"**{canon}** (Job Type)\n\n{desc}",
                 ),
                 range=Range(
                     start=Position(line=position.line, character=0),
@@ -248,11 +264,14 @@ class HoverProvider:
             )
 
         # Check basis sets
-        if word_upper in BASIS_SETS:
+        canon = _ci_lookup(word_upper, BASIS_SETS)
+        if canon is not None:
+            info = BASIS_SETS[canon]
+            desc = info.get("description", str(info)) if isinstance(info, dict) else str(info)
             return Hover(
                 contents=MarkupContent(
                     kind=MarkupKind.Markdown,
-                    value=f"**{word}** (Basis Set)\n\n{BASIS_SETS[word_upper]}",
+                    value=f"**{canon}** (Basis Set)\n\n{desc}",
                 ),
                 range=Range(
                     start=Position(line=position.line, character=0),
