@@ -52,6 +52,7 @@ dev = [
 
 [project.scripts]
 orca-lsp = "orca_lsp.server:main"
+orca-lsp-tool = "orca_lsp.tool:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/orca_lsp"]
@@ -90,3 +91,4 @@ exclude_lines = [
     "pass",
     "..."
 ]
+
