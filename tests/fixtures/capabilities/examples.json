@@ -1,0 +1,4 @@
+{
+  "expected_keys": ["single_point", "optimization", "frequency", "td_dft", "mp2", "ccsd"],
+  "count": 6
+}

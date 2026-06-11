@@ -1,0 +1,21 @@
+{
+  "scf": {
+    "section": "scf",
+    "found": true,
+    "parameters": ["Convergence", "MaxIter", "Guess", "Shift", "Damp", "SlopeEval"]
+  },
+  "pal": {
+    "section": "pal",
+    "found": true,
+    "parameters": ["nprocs", "OmpThreads"]
+  },
+  "mp2": {
+    "section": "mp2",
+    "found": true,
+    "parameters": ["MP2_UseMP2OS", "MP2_UseMP2SS", "MP2_SpinComponentScale", "RI"]
+  },
+  "nonexistent": {
+    "section": "nonexistent",
+    "found": false
+  }
+}

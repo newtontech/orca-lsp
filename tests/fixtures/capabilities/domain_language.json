@@ -1,0 +1,26 @@
+{
+  "language": "ORCA Input",
+  "version": "5.x",
+  "structure": {
+    "route_line": {
+      "prefix": "!",
+      "components": ["method", "basis_set", "job_type", "modifiers"]
+    },
+    "key_blocks": {
+      "prefix": "%",
+      "blocks": ["scf", "pal", "mp2", "method", "geom", "basis", "tddft", "cpcm", "freq", "output", "eprnmr", "md"]
+    },
+    "coordinate_sections": {
+      "prefix": "*",
+      "formats": ["xyz", "int"]
+    },
+    "output_blocks": {
+      "files": [".out", ".gbw", ".hessian", ".cit", ".engrad", ".inp", ".molden", ".xyz", ".prop"]
+    }
+  },
+  "file_types": {
+    "input": [".inp"],
+    "output": [".out", ".gbw", ".hessian", ".cit", ".engrad", ".molden", ".xyz", ".prop"],
+    "auxiliary": [".moinp", ".cis", ".cisp", ".nto"]
+  }
+}

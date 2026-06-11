@@ -1,0 +1,11 @@
+{
+  "valid_input": {
+    "valid": true,
+    "error_count": 0
+  },
+  "invalid_input": {
+    "valid": false,
+    "error_count": 1
+  },
+  "dry_run_options_keys": ["offline_validation", "binary_dry_run", "log_parsing"]
+}

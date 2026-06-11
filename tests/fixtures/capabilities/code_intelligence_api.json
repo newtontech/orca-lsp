@@ -1,0 +1,16 @@
+{
+  "name": "orca-lsp",
+  "version": "1.0.0",
+  "language": "orca",
+  "capabilities": [
+    "diagnostics",
+    "completions",
+    "navigation",
+    "formatting",
+    "rename",
+    "hover",
+    "domain_knowledge",
+    "validation"
+  ],
+  "api_method_count": 11
+}
