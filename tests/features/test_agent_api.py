@@ -567,3 +567,119 @@ class TestDryRunOptions:
         fixture = _load_fixture("validation.json")
         result = AgentAPIProvider().dry_run_options()
         assert set(result.keys()) == set(fixture["dry_run_options_keys"])
+
+
+# ---------------------------------------------------------------------------
+# #69 -- get_rule_manifest / openqc_smoke
+# ---------------------------------------------------------------------------
+
+
+class TestGetRuleManifest:
+    def test_returns_list(self) -> None:
+        result = AgentAPIProvider().get_rule_manifest()
+        assert isinstance(result, list)
+
+    def test_non_empty(self) -> None:
+        result = AgentAPIProvider().get_rule_manifest()
+        assert len(result) > 0
+
+    def test_each_rule_has_required_fields(self) -> None:
+        for rule in AgentAPIProvider().get_rule_manifest():
+            assert "code" in rule, f"Missing 'code' in rule: {rule}"
+            assert "severity" in rule, f"Missing 'severity' in rule: {rule}"
+            assert "description" in rule, f"Missing 'description' in rule: {rule}"
+
+    def test_codes_are_unique(self) -> None:
+        result = AgentAPIProvider().get_rule_manifest()
+        codes = [r["code"] for r in result]
+        assert len(codes) == len(set(codes)), "Duplicate rule codes found"
+
+    def test_severity_values(self) -> None:
+        valid_severities = {"error", "warning", "information", "hint"}
+        for rule in AgentAPIProvider().get_rule_manifest():
+            assert rule["severity"] in valid_severities, f"Invalid severity: {rule['severity']}"
+
+    def test_includes_lint_rules(self) -> None:
+        result = AgentAPIProvider().get_rule_manifest()
+        codes = {r["code"] for r in result}
+        assert "ORCA-E001" in codes
+        assert "ORCA-E002" in codes
+        assert "ORCA-W001" in codes
+        assert "ORCA-W020" in codes
+
+    def test_includes_log_rules(self) -> None:
+        result = AgentAPIProvider().get_rule_manifest()
+        codes = {r["code"] for r in result}
+        assert "ORCA-E024" in codes
+        assert "ORCA-E025" in codes
+
+    def test_matches_fixture_count(self) -> None:
+        fixture = _load_fixture("openqc_smoke.json")
+        result = AgentAPIProvider().get_rule_manifest()
+        assert len(result) == fixture["expected_rule_count"]
+
+    def test_matches_fixture_log_codes(self) -> None:
+        fixture = _load_fixture("openqc_smoke.json")
+        result = AgentAPIProvider().get_rule_manifest()
+        log_codes = {r["code"] for r in result if r["code"].startswith("ORCA-E02")}
+        for code in fixture["log_rule_codes"]:
+            assert code in log_codes
+
+
+class TestOpenqcSmoke:
+    def test_returns_dict(self) -> None:
+        result = AgentAPIProvider().openqc_smoke()
+        assert isinstance(result, dict)
+
+    def test_has_ok_flag(self) -> None:
+        result = AgentAPIProvider().openqc_smoke()
+        assert "ok" in result
+        assert isinstance(result["ok"], bool)
+
+    def test_has_checks_list(self) -> None:
+        result = AgentAPIProvider().openqc_smoke()
+        assert "checks" in result
+        assert isinstance(result["checks"], list)
+
+    def test_has_message(self) -> None:
+        result = AgentAPIProvider().openqc_smoke()
+        assert "message" in result
+        assert isinstance(result["message"], str)
+
+    def test_all_checks_pass(self) -> None:
+        result = AgentAPIProvider().openqc_smoke()
+        assert result["ok"] is True, (
+            f"Smoke failed: {[c for c in result['checks'] if not c['ok']]}"
+        )
+
+    def test_check_names_match_fixture(self) -> None:
+        fixture = _load_fixture("openqc_smoke.json")
+        result = AgentAPIProvider().openqc_smoke()
+        check_names = [c["name"] for c in result["checks"]]
+        assert set(check_names) == set(fixture["smoke_checks"])
+
+    def test_each_check_has_name_ok_detail(self) -> None:
+        result = AgentAPIProvider().openqc_smoke()
+        for check in result["checks"]:
+            assert "name" in check
+            assert "ok" in check
+            assert "detail" in check
+
+    def test_message_on_pass(self) -> None:
+        result = AgentAPIProvider().openqc_smoke()
+        if result["ok"]:
+            assert "passed" in result["message"].lower()
+        else:
+            assert "fail" in result["message"].lower()
+
+    def test_rule_manifest_check_present(self) -> None:
+        result = AgentAPIProvider().openqc_smoke()
+        manifest_check = [c for c in result["checks"] if c["name"] == "rule_manifest"]
+        assert len(manifest_check) == 1
+        assert manifest_check[0]["ok"] is True
+
+    def test_lint_engine_valid_check(self) -> None:
+        result = AgentAPIProvider().openqc_smoke()
+        lint_check = [c for c in result["checks"] if c["name"] == "lint_engine_valid"]
+        assert len(lint_check) == 1
+        assert lint_check[0]["ok"] is True

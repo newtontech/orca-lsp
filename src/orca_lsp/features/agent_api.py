@@ -1080,3 +1080,223 @@ class AgentAPIProvider:
                 "rule_codes": ["ORCA-E024", "ORCA-E025"],
             },
         }
+
+    # ------------------------------------------------------------------
+    # #69 - OpenQC smoke test and rule manifest
+    # ------------------------------------------------------------------
+
+    def get_rule_manifest(self) -> List[Dict[str, Any]]:
+        """Export all diagnostic rules with codes, severities, and descriptions.
+
+        Returns a list of rule descriptors that downstream tools (OpenQC
+        dashboards, CI gates) can use to register and filter diagnostics.
+        Each entry contains a stable ``code``, human-readable ``description``,
+        and ``severity`` string.
+        """
+        from ..features.lint import (
+            RULE_CHARGE_MULTIPLICITY,
+            RULE_DUPLICATE_BLOCK,
+            RULE_DUPLICATE_TOKEN,
+            RULE_INVALID_BLOCK_TERMINATOR,
+            RULE_INVALID_CHARGE,
+            RULE_INVALID_MULTIPLICITY,
+            RULE_MALFORMED_PAL,
+            RULE_MISSING_COORD_TERMINATOR,
+            RULE_MISSING_MAXCORE,
+            RULE_MISSING_METHOD_BASIS,
+            RULE_MISSING_XYZ_HEADER,
+            RULE_NPROCS_HIGH,
+            RULE_NONSTANDARD_TOKEN,
+            RULE_MAXITER_RANGE,
+            RULE_UNKNOWN_BLOCK,
+            RULE_UNKNOWN_TOKEN,
+            RULE_UNCLOSED_BLOCK,
+        )
+        from ..features.test_runner import (
+            RULE_LOG_INPUT_PARSE_ERROR,
+            RULE_LOG_SCF_NOT_CONVERGED,
+        )
+
+        rules: List[Dict[str, Any]] = [
+            {
+                "code": RULE_UNKNOWN_TOKEN,
+                "severity": "error",
+                "description": "Unknown token in simple input line",
+            },
+            {
+                "code": RULE_UNKNOWN_BLOCK,
+                "severity": "error",
+                "description": "Unknown % block name",
+            },
+            {
+                "code": RULE_UNCLOSED_BLOCK,
+                "severity": "error",
+                "description": "Unclosed % block",
+            },
+            {
+                "code": RULE_DUPLICATE_BLOCK,
+                "severity": "error",
+                "description": "Duplicate % block",
+            },
+            {
+                "code": RULE_INVALID_CHARGE,
+                "severity": "error",
+                "description": "Invalid charge value",
+            },
+            {
+                "code": RULE_INVALID_MULTIPLICITY,
+                "severity": "error",
+                "description": "Invalid multiplicity value",
+            },
+            {
+                "code": RULE_CHARGE_MULTIPLICITY,
+                "severity": "error",
+                "description": "Multiplicity incompatible with charge",
+            },
+            {
+                "code": RULE_MISSING_MAXCORE,
+                "severity": "warning",
+                "description": "Suggested %maxcore not set or value very low",
+            },
+            {
+                "code": RULE_NONSTANDARD_TOKEN,
+                "severity": "warning",
+                "description": "Non-standard token in simple input",
+            },
+            {
+                "code": RULE_DUPLICATE_TOKEN,
+                "severity": "warning",
+                "description": "Duplicate token in simple input",
+            },
+            {
+                "code": RULE_MAXITER_RANGE,
+                "severity": "warning",
+                "description": "SCF maxiter out of typical range",
+            },
+            {
+                "code": RULE_NPROCS_HIGH,
+                "severity": "warning",
+                "description": "%pal nprocs unusually high",
+            },
+            {
+                "code": RULE_MISSING_METHOD_BASIS,
+                "severity": "warning",
+                "description": "Missing method or basis set in route line",
+            },
+            {
+                "code": RULE_MALFORMED_PAL,
+                "severity": "error",
+                "description": "Malformed %pal block (missing or invalid nprocs)",
+            },
+            {
+                "code": RULE_MISSING_XYZ_HEADER,
+                "severity": "error",
+                "description": "Missing charge/multiplicity in * xyz header",
+            },
+            {
+                "code": RULE_MISSING_COORD_TERMINATOR,
+                "severity": "error",
+                "description": "Coordinate block not terminated with * or end",
+            },
+            {
+                "code": RULE_INVALID_BLOCK_TERMINATOR,
+                "severity": "error",
+                "description": "Key block missing proper end terminator",
+            },
+            {
+                "code": RULE_LOG_SCF_NOT_CONVERGED,
+                "severity": "error",
+                "description": "SCF convergence failure in ORCA output",
+            },
+            {
+                "code": RULE_LOG_INPUT_PARSE_ERROR,
+                "severity": "error",
+                "description": "Input parse or runtime error in ORCA output",
+            },
+        ]
+        return rules
+
+    def openqc_smoke(self) -> Dict[str, Any]:
+        """Lightweight integration smoke test for OpenQC.
+
+        Exercises the rule manifest, lint engine, and agent API to verify
+        the orca-lsp service is wired correctly.  Returns a dict with
+        ``ok`` (bool), ``checks`` (list of individual check results), and
+        a summary ``message``.
+        """
+        checks: List[Dict[str, Any]] = []
+
+        # Check 1: rule manifest is non-empty and well-formed.
+        manifest = self.get_rule_manifest()
+        codes = {r["code"] for r in manifest}
+        has_required_fields = all(
+            "code" in r and "severity" in r and "description" in r
+            for r in manifest
+        )
+        checks.append(
+            {
+                "name": "rule_manifest",
+                "ok": len(manifest) > 0 and len(codes) == len(manifest) and has_required_fields,
+                "detail": f"{len(manifest)} rules, {len(codes)} unique codes",
+            }
+        )
+
+        # Check 2: lint engine runs on a minimal valid input (H2, closed-shell).
+        valid_input = (
+            "! B3LYP def2-TZVP TightSCF\n"
+            "%maxcore 4000\n"
+            "\n"
+            "* xyz 0 1\n"
+            "  H   0.0   0.0   0.0\n"
+            "  H   0.0   0.0   0.74\n"
+            "*\n"
+        )
+        from ..features.lint import LintProvider
+
+        lint = LintProvider()
+        diags = lint.lint(valid_input)
+        checks.append(
+            {
+                "name": "lint_engine_valid",
+                "ok": len(diags) == 0,
+                "detail": f"{len(diags)} diagnostics on valid input",
+            }
+        )
+
+        # Check 3: lint engine detects errors on invalid input.
+        invalid_input = "! B3LYP\n\n* xyz 0 1\n  H 0 0 0\n*\n"
+        diags_invalid = lint.lint(invalid_input)
+        checks.append(
+            {
+                "name": "lint_engine_invalid",
+                "ok": len(diags_invalid) > 0,
+                "detail": f"{len(diags_invalid)} diagnostics on invalid input",
+            }
+        )
+
+        # Check 4: validate_input works.
+        validation = self.validate_input(valid_input)
+        checks.append(
+            {
+                "name": "validate_input",
+                "ok": validation["valid"] is True,
+                "detail": f"valid={validation['valid']}",
+            }
+        )
+
+        # Check 5: agent API snapshot works.
+        snap = self.get_snapshot(valid_input, uri="smoke://test")
+        checks.append(
+            {
+                "name": "agent_api_snapshot",
+                "ok": snap.uri == "smoke://test" and isinstance(snap.metadata, dict),
+                "detail": f"uri={snap.uri}",
+            }
+        )
+
+        all_ok = all(c["ok"] for c in checks)
+        return {
+            "ok": all_ok,
+            "checks": checks,
+            "message": "OpenQC smoke passed" if all_ok else "OpenQC smoke detected failures",
+        }

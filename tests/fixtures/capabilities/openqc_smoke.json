@@ -1,0 +1,11 @@
+{
+  "expected_rule_count": 19,
+  "smoke_checks": [
+    "rule_manifest",
+    "lint_engine_valid",
+    "lint_engine_invalid",
+    "validate_input",
+    "agent_api_snapshot"
+  ],
+  "log_rule_codes": ["ORCA-E024", "ORCA-E025"]
+}
