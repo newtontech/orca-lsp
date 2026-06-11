@@ -1,0 +1,36 @@
+[
+  {
+    "code": "ORCA-E022",
+    "message": "Coordinate block not terminated with '*' or 'end'",
+    "range": {
+      "end": {
+        "character": 9,
+        "line": 2
+      },
+      "start": {
+        "character": 0,
+        "line": 2
+      }
+    },
+    "severity": 1,
+    "severity_label": "error",
+    "source": "orca-lsp-lint"
+  },
+  {
+    "code": "ORCA-E007",
+    "message": "Multiplicity 1 inconsistent with 1 electrons (charge 0)",
+    "range": {
+      "end": {
+        "character": 9,
+        "line": 2
+      },
+      "start": {
+        "character": 8,
+        "line": 2
+      }
+    },
+    "severity": 1,
+    "severity_label": "error",
+    "source": "orca-lsp-lint"
+  }
+]

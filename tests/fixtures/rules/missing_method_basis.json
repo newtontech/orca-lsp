@@ -1,0 +1,36 @@
+[
+  {
+    "code": "ORCA-W020",
+    "message": "Route line missing method keyword",
+    "range": {
+      "end": {
+        "character": 14,
+        "line": 0
+      },
+      "start": {
+        "character": 0,
+        "line": 0
+      }
+    },
+    "severity": 2,
+    "severity_label": "warning",
+    "source": "orca-lsp-lint"
+  },
+  {
+    "code": "ORCA-E007",
+    "message": "Multiplicity 1 inconsistent with 1 electrons (charge 0)",
+    "range": {
+      "end": {
+        "character": 9,
+        "line": 2
+      },
+      "start": {
+        "character": 8,
+        "line": 2
+      }
+    },
+    "severity": 1,
+    "severity_label": "error",
+    "source": "orca-lsp-lint"
+  }
+]

@@ -1,0 +1,36 @@
+[
+  {
+    "code": "ORCA-E020",
+    "message": "%pal block must contain 'nprocs' with a positive integer",
+    "range": {
+      "end": {
+        "character": 4,
+        "line": 1
+      },
+      "start": {
+        "character": 0,
+        "line": 1
+      }
+    },
+    "severity": 1,
+    "severity_label": "error",
+    "source": "orca-lsp-lint"
+  },
+  {
+    "code": "ORCA-E007",
+    "message": "Multiplicity 1 inconsistent with 1 electrons (charge 0)",
+    "range": {
+      "end": {
+        "character": 9,
+        "line": 3
+      },
+      "start": {
+        "character": 8,
+        "line": 3
+      }
+    },
+    "severity": 1,
+    "severity_label": "error",
+    "source": "orca-lsp-lint"
+  }
+]
