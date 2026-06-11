@@ -44,6 +44,99 @@ _ERROR_PATTERNS = [
 
 _LINE_NUM_RE = re.compile(r"line\s+(\d+)", re.IGNORECASE)
 
+# ---------------------------------------------------------------------------
+# Log parser rule codes (runtime output)
+# ---------------------------------------------------------------------------
+
+RULE_LOG_SCF_NOT_CONVERGED = "ORCA-E024"
+RULE_LOG_INPUT_PARSE_ERROR = "ORCA-E025"
+
+_LOG_SOURCE = "orca-log-parser"
+
+# Patterns matched against ORCA log/output files.
+# Each entry is (compiled_regex, rule_code, human_message_template).
+_LOG_PATTERNS: list[tuple[re.Pattern[str], str, str]] = [
+    (
+        re.compile(r"SCF NOT CONVERGED", re.IGNORECASE),
+        RULE_LOG_SCF_NOT_CONVERGED,
+        "SCF convergence failure detected in ORCA output",
+    ),
+    (
+        re.compile(r"WARNING:\s*SCF did not converge", re.IGNORECASE),
+        RULE_LOG_SCF_NOT_CONVERGED,
+        "SCF did not converge during calculation",
+    ),
+    (
+        re.compile(r"Error:\s*could not read input", re.IGNORECASE),
+        RULE_LOG_INPUT_PARSE_ERROR,
+        "ORCA could not read input file",
+    ),
+    (
+        re.compile(r"FATAL ERROR", re.IGNORECASE),
+        RULE_LOG_INPUT_PARSE_ERROR,
+        "FATAL ERROR encountered during ORCA execution",
+    ),
+    (
+        re.compile(r"ORCA finished by error", re.IGNORECASE),
+        RULE_LOG_INPUT_PARSE_ERROR,
+        "ORCA finished by error",
+    ),
+    (
+        re.compile(r"Segmentation fault", re.IGNORECASE),
+        RULE_LOG_INPUT_PARSE_ERROR,
+        "Segmentation fault during ORCA execution",
+    ),
+    (
+        re.compile(r"Memory allocation failed", re.IGNORECASE),
+        RULE_LOG_INPUT_PARSE_ERROR,
+        "Memory allocation failed during ORCA execution",
+    ),
+]
+
+
+def parse_log(path_or_text: str | Path) -> list[Diagnostic]:
+    """Parse ORCA log/output text and return diagnostics for runtime errors.
+
+    Accepts either a file path (str or Path) to an ORCA log file, or the raw
+    text content of the log.  Scans for known error patterns and produces LSP
+    diagnostics with stable rule codes.
+
+    Rule codes
+    ----------
+    ORCA-E024  SCF convergence failure         Error
+    ORCA-E025  Input parse / runtime error      Error
+    """
+    path = Path(path_or_text)
+    if path.is_file():
+        text = path.read_text(encoding="utf-8", errors="replace")
+    else:
+        text = str(path_or_text)
+
+    diagnostics: list[Diagnostic] = []
+    seen: set[tuple[str, int]] = set()
+
+    for lineno_0, line in enumerate(text.splitlines()):
+        for pattern, rule_code, message in _LOG_PATTERNS:
+            if pattern.search(line):
+                key = (rule_code, lineno_0)
+                if key in seen:
+                    continue
+                seen.add(key)
+                diagnostics.append(
+                    Diagnostic(
+                        range=Range(
+                            start=Position(lineno_0, 0),
+                            end=Position(lineno_0, len(line)),
+                        ),
+                        message=message,
+                        severity=DiagnosticSeverity.Error,
+                        source=_LOG_SOURCE,
+                        code=rule_code,
+                    )
+                )
+
+    return diagnostics
+
 
 def parse_solver_output(raw: str) -> SolverOutput:
     errors: List[Dict[str, Any]] = []

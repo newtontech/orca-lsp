@@ -1,0 +1,13 @@
+[
+  {
+    "code": "ORCA-E024",
+    "message": "SCF convergence failure detected in ORCA output",
+    "range": {
+      "start": { "line": 3, "character": 0 },
+      "end": { "line": 3, "character": 16 }
+    },
+    "severity": 1,
+    "severity_label": "error",
+    "source": "orca-log-parser"
+  }
+]

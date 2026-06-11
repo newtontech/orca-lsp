@@ -1,0 +1,13 @@
+[
+  {
+    "code": "ORCA-E025",
+    "message": "ORCA could not read input file",
+    "range": {
+      "start": { "line": 2, "character": 0 },
+      "end": { "line": 2, "character": 31 }
+    },
+    "severity": 1,
+    "severity_label": "error",
+    "source": "orca-log-parser"
+  }
+]
