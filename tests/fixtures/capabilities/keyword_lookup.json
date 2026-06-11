@@ -1,0 +1,25 @@
+{
+  "scf_MaxIter": {
+    "section": "scf",
+    "keyword": "MaxIter",
+    "found": true,
+    "type": "integer"
+  },
+  "scf_Convergence": {
+    "section": "scf",
+    "keyword": "Convergence",
+    "found": true,
+    "type": "enum"
+  },
+  "pal_nprocs": {
+    "section": "pal",
+    "keyword": "nprocs",
+    "found": true,
+    "type": "integer"
+  },
+  "scf_nonexistent": {
+    "section": "scf",
+    "keyword": "nonexistent",
+    "found": false
+  }
+}
