@@ -9,9 +9,14 @@ from orca_lsp.features.lint import (
     RULE_CHARGE_MULTIPLICITY,
     RULE_DUPLICATE_BLOCK,
     RULE_DUPLICATE_TOKEN,
+    RULE_INVALID_BLOCK_TERMINATOR,
     RULE_INVALID_MULTIPLICITY,
+    RULE_MALFORMED_PAL,
     RULE_MAXITER_RANGE,
+    RULE_MISSING_COORD_TERMINATOR,
     RULE_MISSING_MAXCORE,
+    RULE_MISSING_METHOD_BASIS,
+    RULE_MISSING_XYZ_HEADER,
     RULE_NPROCS_HIGH,
     RULE_UNCLOSED_BLOCK,
     RULE_UNKNOWN_BLOCK,
@@ -626,3 +631,272 @@ class TestEdgeCases:
         diagnostics = provider.lint(text)
         codes = [d.code for d in diagnostics]
         assert RULE_UNKNOWN_TOKEN not in codes
+
+
+# ---------------------------------------------------------------------------
+# Missing method / basis in route line (ORCA-W020)
+# ---------------------------------------------------------------------------
+
+
+class TestMissingMethodBasis:
+    """Tests for missing method or basis set in the route line."""
+
+    def test_missing_method_detected(self, provider: LintProvider) -> None:
+        """Route line with only basis set but no method produces ORCA-W020."""
+        text = "! def2-TZVP SP\n%maxcore 4000\n* xyz 0 1\n  H 0 0 0\n*\n"
+        diagnostics = provider.lint(text)
+        codes = [d.code for d in diagnostics]
+        assert RULE_MISSING_METHOD_BASIS in codes, (
+            f"Expected {RULE_MISSING_METHOD_BASIS}, got codes: {codes}"
+        )
+
+    def test_missing_basis_detected(self, provider: LintProvider) -> None:
+        """Route line with only method but no basis set produces ORCA-W020."""
+        text = "! B3LYP SP\n%maxcore 4000\n* xyz 0 1\n  H 0 0 0\n*\n"
+        diagnostics = provider.lint(text)
+        codes = [d.code for d in diagnostics]
+        assert RULE_MISSING_METHOD_BASIS in codes
+
+    def test_missing_both_detected(self, provider: LintProvider) -> None:
+        """Route line with neither method nor basis set produces ORCA-W020."""
+        text = "! SP\n%maxcore 4000\n* xyz 0 1\n  H 0 0 0\n*\n"
+        diagnostics = provider.lint(text)
+        codes = [d.code for d in diagnostics]
+        assert RULE_MISSING_METHOD_BASIS in codes
+
+    def test_has_both_no_warning(self, provider: LintProvider) -> None:
+        """Route line with method and basis set produces no ORCA-W020."""
+        text = "! B3LYP def2-TZVP SP\n%maxcore 4000\n* xyz 0 1\n  H 0 0 0\n*\n"
+        diagnostics = provider.lint(text)
+        codes = [d.code for d in diagnostics]
+        assert RULE_MISSING_METHOD_BASIS not in codes
+
+    def test_missing_method_basis_severity_warning(self, provider: LintProvider) -> None:
+        """Missing method/basis diagnostic has Warning severity."""
+        from lsprotocol.types import DiagnosticSeverity
+
+        text = "! def2-TZVP SP\n%maxcore 4000\n* xyz 0 1\n  H 0 0 0\n*\n"
+        diagnostics = provider.lint(text)
+        for d in diagnostics:
+            if d.code == RULE_MISSING_METHOD_BASIS:
+                assert d.severity == DiagnosticSeverity.Warning
+                return
+        pytest.fail("No ORCA-W020 diagnostic found")
+
+
+# ---------------------------------------------------------------------------
+# Malformed %pal block (ORCA-E020)
+# ---------------------------------------------------------------------------
+
+
+class TestMalformedPal:
+    """Tests for malformed %pal blocks."""
+
+    def test_pal_missing_nprocs(self, provider: LintProvider) -> None:
+        """%pal block without nprocs produces ORCA-E020."""
+        text = (
+            "! B3LYP def2-TZVP SP\n"
+            "%pal\n"
+            "end\n"
+            "* xyz 0 1\n"
+            "  H 0 0 0\n"
+            "*\n"
+        )
+        diagnostics = provider.lint(text)
+        codes = [d.code for d in diagnostics]
+        assert RULE_MALFORMED_PAL in codes, (
+            f"Expected {RULE_MALFORMED_PAL}, got codes: {codes}"
+        )
+
+    def test_pal_nprocs_zero(self, provider: LintProvider) -> None:
+        """%pal with nprocs 0 produces ORCA-E020."""
+        text = (
+            "! B3LYP def2-TZVP SP\n"
+            "%pal nprocs 0 end\n"
+            "* xyz 0 1\n"
+            "  H 0 0 0\n"
+            "*\n"
+        )
+        diagnostics = provider.lint(text)
+        codes = [d.code for d in diagnostics]
+        assert RULE_MALFORMED_PAL in codes
+
+    def test_pal_nprocs_negative(self, provider: LintProvider) -> None:
+        """%pal with negative nprocs produces ORCA-E020."""
+        text = (
+            "! B3LYP def2-TZVP SP\n"
+            "%pal nprocs -2 end\n"
+            "* xyz 0 1\n"
+            "  H 0 0 0\n"
+            "*\n"
+        )
+        diagnostics = provider.lint(text)
+        codes = [d.code for d in diagnostics]
+        assert RULE_MALFORMED_PAL in codes
+
+    def test_pal_valid_nprocs_no_error(self, provider: LintProvider) -> None:
+        """%pal with valid nprocs produces no ORCA-E020."""
+        text = (
+            "! B3LYP def2-TZVP SP\n"
+            "%pal nprocs 4 end\n"
+            "* xyz 0 1\n"
+            "  H 0 0 0\n"
+            "*\n"
+        )
+        diagnostics = provider.lint(text)
+        codes = [d.code for d in diagnostics]
+        assert RULE_MALFORMED_PAL not in codes
+
+    def test_malformed_pal_severity_error(self, provider: LintProvider) -> None:
+        """Malformed %pal diagnostic has Error severity."""
+        from lsprotocol.types import DiagnosticSeverity
+
+        text = "! B3LYP def2-TZVP SP\n%pal\nend\n* xyz 0 1\n  H 0 0 0\n*\n"
+        diagnostics = provider.lint(text)
+        for d in diagnostics:
+            if d.code == RULE_MALFORMED_PAL:
+                assert d.severity == DiagnosticSeverity.Error
+                return
+        pytest.fail("No ORCA-E020 diagnostic found")
+
+
+# ---------------------------------------------------------------------------
+# Missing charge/multiplicity in * xyz header (ORCA-E021)
+# ---------------------------------------------------------------------------
+
+
+class TestMissingXyzHeader:
+    """Tests for missing charge/multiplicity in * xyz header."""
+
+    def test_missing_charge_mult(self, provider: LintProvider) -> None:
+        """* xyz without charge and multiplicity produces ORCA-E021."""
+        text = "! B3LYP def2-TZVP SP\n%maxcore 4000\n* xyz\n  H 0 0 0\n*\n"
+        diagnostics = provider.lint(text)
+        codes = [d.code for d in diagnostics]
+        assert RULE_MISSING_XYZ_HEADER in codes, (
+            f"Expected {RULE_MISSING_XYZ_HEADER}, got codes: {codes}"
+        )
+
+    def test_valid_xyz_header_no_error(self, provider: LintProvider) -> None:
+        """* xyz 0 1 with both values produces no ORCA-E021."""
+        text = "! B3LYP def2-TZVP SP\n%maxcore 4000\n* xyz 0 1\n  H 0 0 0\n*\n"
+        diagnostics = provider.lint(text)
+        codes = [d.code for d in diagnostics]
+        assert RULE_MISSING_XYZ_HEADER not in codes
+
+    def test_missing_xyz_header_severity_error(self, provider: LintProvider) -> None:
+        """Missing xyz header diagnostic has Error severity."""
+        from lsprotocol.types import DiagnosticSeverity
+
+        text = "! B3LYP def2-TZVP SP\n%maxcore 4000\n* xyz\n  H 0 0 0\n*\n"
+        diagnostics = provider.lint(text)
+        for d in diagnostics:
+            if d.code == RULE_MISSING_XYZ_HEADER:
+                assert d.severity == DiagnosticSeverity.Error
+                return
+        pytest.fail("No ORCA-E021 diagnostic found")
+
+
+# ---------------------------------------------------------------------------
+# Missing coordinate block terminator (ORCA-E022)
+# ---------------------------------------------------------------------------
+
+
+class TestMissingCoordTerminator:
+    """Tests for coordinate blocks not terminated with * or end."""
+
+    def test_missing_terminator(self, provider: LintProvider) -> None:
+        """* xyz block without closing * produces ORCA-E022."""
+        text = "! B3LYP def2-TZVP SP\n%maxcore 4000\n* xyz 0 1\n  H 0 0 0\n"
+        diagnostics = provider.lint(text)
+        codes = [d.code for d in diagnostics]
+        assert RULE_MISSING_COORD_TERMINATOR in codes, (
+            f"Expected {RULE_MISSING_COORD_TERMINATOR}, got codes: {codes}"
+        )
+
+    def test_properly_terminated_no_error(self, provider: LintProvider) -> None:
+        """* xyz block with closing * produces no ORCA-E022."""
+        text = "! B3LYP def2-TZVP SP\n%maxcore 4000\n* xyz 0 1\n  H 0 0 0\n*\n"
+        diagnostics = provider.lint(text)
+        codes = [d.code for d in diagnostics]
+        assert RULE_MISSING_COORD_TERMINATOR not in codes
+
+    def test_terminated_with_end(self, provider: LintProvider) -> None:
+        """* xyz block terminated with 'end' produces no ORCA-E022."""
+        text = "! B3LYP def2-TZVP SP\n%maxcore 4000\n* xyz 0 1\n  H 0 0 0\nend\n"
+        diagnostics = provider.lint(text)
+        codes = [d.code for d in diagnostics]
+        assert RULE_MISSING_COORD_TERMINATOR not in codes
+
+    def test_missing_coord_terminator_severity_error(self, provider: LintProvider) -> None:
+        """Missing coord terminator diagnostic has Error severity."""
+        from lsprotocol.types import DiagnosticSeverity
+
+        text = "! B3LYP def2-TZVP SP\n%maxcore 4000\n* xyz 0 1\n  H 0 0 0\n"
+        diagnostics = provider.lint(text)
+        for d in diagnostics:
+            if d.code == RULE_MISSING_COORD_TERMINATOR:
+                assert d.severity == DiagnosticSeverity.Error
+                return
+        pytest.fail("No ORCA-E022 diagnostic found")
+
+
+# ---------------------------------------------------------------------------
+# Invalid key-block terminator (ORCA-E023)
+# ---------------------------------------------------------------------------
+
+
+class TestInvalidBlockTerminator:
+    """Tests for key blocks missing proper 'end' terminator."""
+
+    def test_scf_missing_end(self, provider: LintProvider) -> None:
+        """%scf block without 'end' produces ORCA-E023."""
+        text = (
+            "! B3LYP def2-TZVP SP\n"
+            "%scf\n"
+            "  maxiter 100\n"
+            "%maxcore 4000\n"
+            "* xyz 0 1\n"
+            "  H 0 0 0\n"
+            "*\n"
+        )
+        diagnostics = provider.lint(text)
+        codes = [d.code for d in diagnostics]
+        assert RULE_INVALID_BLOCK_TERMINATOR in codes, (
+            f"Expected {RULE_INVALID_BLOCK_TERMINATOR}, got codes: {codes}"
+        )
+
+    def test_scf_with_end_no_error(self, provider: LintProvider) -> None:
+        """%scf block with 'end' produces no ORCA-E023."""
+        text = (
+            "! B3LYP def2-TZVP SP\n"
+            "%scf\n"
+            "  maxiter 100\n"
+            "end\n"
+            "%maxcore 4000\n"
+            "* xyz 0 1\n"
+            "  H 0 0 0\n"
+            "*\n"
+        )
+        diagnostics = provider.lint(text)
+        codes = [d.code for d in diagnostics]
+        assert RULE_INVALID_BLOCK_TERMINATOR not in codes
+
+    def test_single_line_value_no_error(self, provider: LintProvider) -> None:
+        """Single-line %maxcore 4000 is not flagged as missing terminator."""
+        text = "! B3LYP def2-TZVP SP\n%maxcore 4000\n* xyz 0 1\n  H 0 0 0\n*\n"
+        diagnostics = provider.lint(text)
+        codes = [d.code for d in diagnostics]
+        assert RULE_INVALID_BLOCK_TERMINATOR not in codes
+
+    def test_invalid_block_terminator_severity_error(self, provider: LintProvider) -> None:
+        """Invalid block terminator diagnostic has Error severity."""
+        from lsprotocol.types import DiagnosticSeverity
+
+        text = "! B3LYP def2-TZVP SP\n%scf\n  maxiter 100\n%maxcore 4000\n* xyz 0 1\n  H 0 0 0\n*\n"
+        diagnostics = provider.lint(text)
+        for d in diagnostics:
+            if d.code == RULE_INVALID_BLOCK_TERMINATOR:
+                assert d.severity == DiagnosticSeverity.Error
+                return
+        pytest.fail("No ORCA-E023 diagnostic found")

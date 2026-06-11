@@ -1,0 +1,53 @@
+[
+  {
+    "code": "ORCA-E003",
+    "message": "Unclosed % block: '%scf'",
+    "range": {
+      "end": {
+        "character": 4,
+        "line": 1
+      },
+      "start": {
+        "character": 0,
+        "line": 1
+      }
+    },
+    "severity": 1,
+    "severity_label": "error",
+    "source": "orca-lsp-lint"
+  },
+  {
+    "code": "ORCA-E023",
+    "message": "Key block '%scf' missing 'end' terminator",
+    "range": {
+      "end": {
+        "character": 4,
+        "line": 1
+      },
+      "start": {
+        "character": 0,
+        "line": 1
+      }
+    },
+    "severity": 1,
+    "severity_label": "error",
+    "source": "orca-lsp-lint"
+  },
+  {
+    "code": "ORCA-E007",
+    "message": "Multiplicity 1 inconsistent with 1 electrons (charge 0)",
+    "range": {
+      "end": {
+        "character": 9,
+        "line": 4
+      },
+      "start": {
+        "character": 8,
+        "line": 4
+      }
+    },
+    "severity": 1,
+    "severity_label": "error",
+    "source": "orca-lsp-lint"
+  }
+]

@@ -23,6 +23,11 @@ ORCA-W002     Non-standard token in simple input                 Warning
 ORCA-W003     Duplicate token in simple input                    Warning
 ORCA-W004     %scf maxiter out of typical range                  Warning
 ORCA-W005     %pal nprocs unusually high                         Warning
+ORCA-W020     Missing method or basis set in route line          Warning
+ORCA-E020     Malformed %pal block (missing or invalid nprocs)  Error
+ORCA-E021     Missing charge/multiplicity in * xyz header        Error
+ORCA-E022     Coordinate block not terminated with * or end      Error
+ORCA-E023     Key block missing proper end terminator            Error
 ============  =================================================  ==========
 """
 
@@ -41,7 +46,10 @@ from lsprotocol.types import (
 
 from ..keywords import (
     ALL_KEYWORDS,
+    BASIS_SETS,
+    DFT_FUNCTIONALS,
     PERCENT_BLOCKS,
+    WAVEFUNCTION_METHODS,
 )
 from ..parser import ORCAParser, ParseResult, PercentBlock
 
@@ -62,6 +70,12 @@ RULE_NONSTANDARD_TOKEN = "ORCA-W002"
 RULE_DUPLICATE_TOKEN = "ORCA-W003"
 RULE_MAXITER_RANGE = "ORCA-W004"
 RULE_NPROCS_HIGH = "ORCA-W005"
+
+RULE_MISSING_METHOD_BASIS = "ORCA-W020"
+RULE_MALFORMED_PAL = "ORCA-E020"
+RULE_MISSING_XYZ_HEADER = "ORCA-E021"
+RULE_MISSING_COORD_TERMINATOR = "ORCA-E022"
+RULE_INVALID_BLOCK_TERMINATOR = "ORCA-E023"
 
 # Known tokens that are not in ALL_KEYWORDS but are valid ORCA simple-input
 # keywords (modifiers, convergence settings, solvent models, etc.).
@@ -161,6 +175,11 @@ class LintProvider:
         self._check_percent_blocks(result, lines, diagnostics)
         self._check_charge_multiplicity(result, lines, diagnostics)
         self._check_block_parameters(result, lines, diagnostics)
+        self._check_route_method_basis(result, lines, diagnostics)
+        self._check_pal_malformed(result, lines, diagnostics)
+        self._check_xyz_header(lines, diagnostics)
+        self._check_coord_terminator(lines, diagnostics)
+        self._check_block_terminator(lines, diagnostics)
 
         return diagnostics
 
@@ -622,6 +641,301 @@ class LintProvider:
                     code=RULE_MISSING_MAXCORE,
                 )
             )
+
+    # ------------------------------------------------------------------
+    # Route-line method/basis check (ORCA-W020)
+    # ------------------------------------------------------------------
+
+    def _check_route_method_basis(
+        self,
+        result: ParseResult,
+        lines: List[str],
+        diagnostics: List[Diagnostic],
+    ) -> None:
+        """Check route line for a method keyword and a basis-set keyword.
+
+        The route line is the first non-comment, non-empty line starting with
+        ``!``.  If it is missing a method (DFT functional, HF, MP2, etc.) or a
+        basis set, a warning is emitted.
+
+        Args:
+            result: Parsed result.
+            lines: Document lines.
+            diagnostics: Accumulator for diagnostics.
+        """
+        if result.simple_input is None:
+            return
+
+        si = result.simple_input
+        line_idx = si.line_number
+        if line_idx >= len(lines):
+            return
+
+        has_method = len(si.methods) > 0
+        has_basis = len(si.basis_sets) > 0
+
+        if has_method and has_basis:
+            return
+
+        raw_line = lines[line_idx]
+        col = raw_line.find("!")
+        if col < 0:
+            col = 0
+        end_col = len(raw_line.rstrip())
+
+        missing: List[str] = []
+        if not has_method:
+            missing.append("method")
+        if not has_basis:
+            missing.append("basis set")
+
+        diagnostics.append(
+            Diagnostic(
+                range=Range(
+                    start=Position(line=line_idx, character=col),
+                    end=Position(line=line_idx, character=end_col),
+                ),
+                message=(
+                    f"Route line missing {' and '.join(missing)} keyword"
+                ),
+                severity=DiagnosticSeverity.Warning,
+                source="orca-lsp-lint",
+                code=RULE_MISSING_METHOD_BASIS,
+            )
+        )
+
+    # ------------------------------------------------------------------
+    # Malformed %pal block (ORCA-E020)
+    # ------------------------------------------------------------------
+
+    def _check_pal_malformed(
+        self,
+        result: ParseResult,
+        lines: List[str],
+        diagnostics: List[Diagnostic],
+    ) -> None:
+        """Check that ``%pal`` blocks contain ``nprocs`` with a positive integer.
+
+        Args:
+            result: Parsed result.
+            lines: Document lines.
+            diagnostics: Accumulator for diagnostics.
+        """
+        for block in result.percent_blocks:
+            if block.name.lower() != "pal":
+                continue
+
+            nprocs = block.parameters.get("nprocs")
+            if nprocs is None or not isinstance(nprocs, int) or nprocs < 1:
+                col = self._block_name_col(lines, block.line_start)
+                diagnostics.append(
+                    Diagnostic(
+                        range=Range(
+                            start=Position(line=block.line_start, character=col),
+                            end=Position(
+                                line=block.line_start,
+                                character=col + len(block.name) + 1,
+                            ),
+                        ),
+                        message=(
+                            "%pal block must contain 'nprocs' with a positive integer"
+                        ),
+                        severity=DiagnosticSeverity.Error,
+                        source="orca-lsp-lint",
+                        code=RULE_MALFORMED_PAL,
+                    )
+                )
+
+    # ------------------------------------------------------------------
+    # Missing charge/multiplicity in * xyz header (ORCA-E021)
+    # ------------------------------------------------------------------
+
+    def _check_xyz_header(
+        self,
+        lines: List[str],
+        diagnostics: List[Diagnostic],
+    ) -> None:
+        """Check ``* xyz`` blocks for charge and multiplicity.
+
+        The header format must be ``* xyz <charge> <mult>``.  If either value
+        is missing, an error is emitted.
+
+        Args:
+            lines: Document lines.
+            diagnostics: Accumulator for diagnostics.
+        """
+        _xyz_re = re.compile(r"^\s*\*\s*xyz\b", re.IGNORECASE)
+        for i, line in enumerate(lines):
+            if not _xyz_re.match(line):
+                continue
+            parts = line.split()
+            # parts[0]="*", parts[1]="xyz", parts[2]=charge, parts[3]=mult
+            if len(parts) < 4:
+                col = line.find("*")
+                if col < 0:
+                    col = 0
+                end_col = len(line.rstrip())
+                if end_col <= col:
+                    end_col = col + 1
+                diagnostics.append(
+                    Diagnostic(
+                        range=Range(
+                            start=Position(line=i, character=col),
+                            end=Position(line=i, character=end_col),
+                        ),
+                        message="* xyz header missing charge and/or multiplicity",
+                        severity=DiagnosticSeverity.Error,
+                        source="orca-lsp-lint",
+                        code=RULE_MISSING_XYZ_HEADER,
+                    )
+                )
+
+    # ------------------------------------------------------------------
+    # Missing coordinate block terminator (ORCA-E022)
+    # ------------------------------------------------------------------
+
+    def _check_coord_terminator(
+        self,
+        lines: List[str],
+        diagnostics: List[Diagnostic],
+    ) -> None:
+        """Check that coordinate sections (``* xyz``) end with ``*`` or ``end``.
+
+        Args:
+            lines: Document lines.
+            diagnostics: Accumulator for diagnostics.
+        """
+        _xyz_re = re.compile(r"^\s*\*\s*xyz\b", re.IGNORECASE)
+        _star_re = re.compile(r"^\s*\*\s*$")
+        _end_re = re.compile(r"^\s*end\s*$", re.IGNORECASE)
+        _block_start_re = re.compile(r"^\s*%\s*\w+", re.IGNORECASE)
+
+        i = 0
+        while i < len(lines):
+            if not _xyz_re.match(lines[i]):
+                i += 1
+                continue
+
+            # Found a * xyz block.  Scan forward for terminator.
+            j = i + 1
+            found_terminator = False
+            while j < len(lines):
+                stripped = lines[j].strip()
+                # Bare * or * with only trailing whitespace terminates
+                if _star_re.match(lines[j]) or stripped.startswith("* "):
+                    found_terminator = True
+                    break
+                # "end" also terminates
+                if _end_re.match(lines[j]):
+                    found_terminator = True
+                    break
+                # Another % block or * xyz before terminator means we've
+                # gone past the section without finding one.
+                if _block_start_re.match(lines[j]) or _xyz_re.match(lines[j]):
+                    break
+                j += 1
+
+            if not found_terminator:
+                col = lines[i].find("*")
+                if col < 0:
+                    col = 0
+                end_col = len(lines[i].rstrip())
+                if end_col <= col:
+                    end_col = col + 1
+                diagnostics.append(
+                    Diagnostic(
+                        range=Range(
+                            start=Position(line=i, character=col),
+                            end=Position(line=i, character=end_col),
+                        ),
+                        message="Coordinate block not terminated with '*' or 'end'",
+                        severity=DiagnosticSeverity.Error,
+                        source="orca-lsp-lint",
+                        code=RULE_MISSING_COORD_TERMINATOR,
+                    )
+                )
+
+            i = j + 1 if found_terminator else i + 1
+
+    # ------------------------------------------------------------------
+    # Invalid key-block terminator (ORCA-E023)
+    # ------------------------------------------------------------------
+
+    def _check_block_terminator(
+        self,
+        lines: List[str],
+        diagnostics: List[Diagnostic],
+    ) -> None:
+        """Check that key blocks (``%xxx ...``) have a proper ``end`` terminator.
+
+        Multi-line blocks that are not single-line assignments must end with
+        ``end``.  This complements the existing unclosed-block check by
+        specifically validating the terminator syntax for known block types.
+
+        Args:
+            lines: Document lines.
+            diagnostics: Accumulator for diagnostics.
+        """
+        _block_start_re = re.compile(r"^\s*%\s*(\w+)", re.IGNORECASE)
+        _end_re = re.compile(r"\bend\b", re.IGNORECASE)
+
+        i = 0
+        while i < len(lines):
+            stripped = lines[i].strip()
+            match = _block_start_re.match(stripped)
+            if not match:
+                i += 1
+                continue
+
+            block_name = match.group(1).lower()
+
+            # Self-closing line (contains "end")
+            if _end_re.search(stripped):
+                i += 1
+                continue
+
+            # Single-line value block (e.g. %maxcore 4000)
+            parts = stripped.split()
+            if len(parts) == 2:
+                value = parts[1]
+                if value.isdigit() or (value.startswith('"') and value.endswith('"')):
+                    i += 1
+                    continue
+
+            # Multi-line block: scan for "end"
+            found_end = False
+            j = i + 1
+            while j < len(lines):
+                inner_stripped = lines[j].strip()
+                if _end_re.search(inner_stripped):
+                    found_end = True
+                    break
+                # Another block starts before end
+                inner_match = _block_start_re.match(inner_stripped)
+                if inner_match:
+                    inner_name = inner_match.group(1).lower()
+                    if inner_name in PERCENT_BLOCKS or inner_name == block_name:
+                        break
+                j += 1
+
+            if not found_end:
+                col = lines[i].find("%")
+                if col < 0:
+                    col = 0
+                diagnostics.append(
+                    Diagnostic(
+                        range=Range(
+                            start=Position(line=i, character=col),
+                            end=Position(line=i, character=col + len(block_name) + 1),
+                        ),
+                        message=f"Key block '%{block_name}' missing 'end' terminator",
+                        severity=DiagnosticSeverity.Error,
+                        source="orca-lsp-lint",
+                        code=RULE_INVALID_BLOCK_TERMINATOR,
+                    )
+                )
+
+            i = j + 1 if found_end else i + 1
 
     # ------------------------------------------------------------------
     # Snapshot helpers
