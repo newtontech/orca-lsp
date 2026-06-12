@@ -1,0 +1,18 @@
+# Counterpoise correction for BSSE
+! MP2 def2-TZVP SP
+%maxcore 4000
+%pal nprocs 4 end
+%cp
+  fragments 2
+  charge(1) 0 1
+  charge(2) 0 1
+end
+
+* xyz 0 1
+  O   0.000000   0.000000   0.000000
+  H   0.757160   0.586260   0.000000
+  H  -0.757160   0.586260   0.000000
+  O   0.000000   0.000000   3.000000
+  H   0.757160   0.586260   3.000000
+  H  -0.757160   0.586260   3.000000
+*

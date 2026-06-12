@@ -1,0 +1,15 @@
+# TD-DFT excited state calculation
+! B3LYP def2-TZVP SP
+%maxcore 4000
+%pal nprocs 4 end
+%tddft
+  nroots 10
+  maxdim 100
+end
+
+* xyz 0 1
+  C   0.000000   0.000000   0.000000
+  O   1.200000   0.000000   0.000000
+  H  -0.500000   0.900000   0.000000
+  H  -0.500000  -0.900000   0.000000
+*

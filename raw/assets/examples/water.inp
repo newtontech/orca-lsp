@@ -1,0 +1,10 @@
+# Water molecule - B3LYP optimization
+! B3LYP def2-TZVP OPT FREQ
+%maxcore 4000
+%pal nprocs 4 end
+
+* xyz 0 1
+  O   0.000000   0.000000   0.000000
+  H   0.757160   0.586260   0.000000
+  H  -0.757160   0.586260   0.000000
+*
