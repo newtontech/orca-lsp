@@ -46,10 +46,7 @@ from lsprotocol.types import (
 
 from ..keywords import (
     ALL_KEYWORDS,
-    BASIS_SETS,
-    DFT_FUNCTIONALS,
     PERCENT_BLOCKS,
-    WAVEFUNCTION_METHODS,
 )
 from ..parser import ORCAParser, ParseResult, PercentBlock
 
@@ -695,9 +692,7 @@ class LintProvider:
                     start=Position(line=line_idx, character=col),
                     end=Position(line=line_idx, character=end_col),
                 ),
-                message=(
-                    f"Route line missing {' and '.join(missing)} keyword"
-                ),
+                message=(f"Route line missing {' and '.join(missing)} keyword"),
                 severity=DiagnosticSeverity.Warning,
                 source="orca-lsp-lint",
                 code=RULE_MISSING_METHOD_BASIS,
@@ -737,9 +732,7 @@ class LintProvider:
                                 character=col + len(block.name) + 1,
                             ),
                         ),
-                        message=(
-                            "%pal block must contain 'nprocs' with a positive integer"
-                        ),
+                        message=("%pal block must contain 'nprocs' with a positive integer"),
                         severity=DiagnosticSeverity.Error,
                         source="orca-lsp-lint",
                         code=RULE_MALFORMED_PAL,
