@@ -87,6 +87,8 @@
 ## 相关来源 / Related Sources
 
 - `src/orca_lsp/keywords.py`：BASIS_SETS字典
+- `raw/assets/orca-basis-sets-reference.md` -- ORCA 6.1.1 Manual Section 2.7, complete basis set reference
+- `raw/assets/orca-keywords-reference.md` -- Keywords reference including basis set keywords
 
 ## 相关实体/概念 / Related Entities/Concepts
 

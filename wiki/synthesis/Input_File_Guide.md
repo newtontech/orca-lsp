@@ -272,3 +272,8 @@ end
 - `raw/assets/examples/benzene.inp`
 - `raw/assets/examples/td_dft.inp`
 - `raw/assets/examples/solvation.inp`
+- `raw/assets/orca-input-format.md` -- ORCA 6.1.1 Manual Section 2.1 (official input format)
+- `raw/assets/orca-keywords-reference.md` -- Comprehensive keyword reference
+- `raw/assets/orca-examples.md` -- 18 example input files with annotations
+- `raw/assets/orca-compound-jobs.md` -- Multi-step workflow patterns
+- ORCA 6.0 Tutorials: https://www.faccts.de/docs/orca/6.0/tutorials/first_steps/input_output.html

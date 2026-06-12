@@ -41,6 +41,10 @@ ORCA输入文件使用`.inp`扩展名，包含三个主要部分：
 - `raw/assets/docs/ARCHITECTURE.md`
 - `raw/assets/examples/water.inp`
 - `raw/assets/examples/benzene.inp`
+- `raw/assets/orca-input-format.md` -- ORCA 6.1.1 Manual Section 2.1
+- `raw/assets/orca-keywords-reference.md` -- Keywords, methods, basis sets, job types
+- `raw/assets/orca-tutorials.md` -- ORCA tutorials and learning resources
+- `raw/assets/orca-github-tools.md` -- GitHub ORCA tools and parsers
 
 ## 相关实体/概念 / Related Entities/Concepts
 
