@@ -19,7 +19,6 @@ from ..keywords import (
 from ..parser import ORCAParser
 from ..validator import ORCAValidator
 
-
 # ---------------------------------------------------------------------------
 # Section parameter schemas (used by lookup_section / lookup_keyword)
 # ---------------------------------------------------------------------------
@@ -664,13 +663,31 @@ class AgentAPIProvider:
                 "output_blocks": {
                     "description": "ORCA writes several output files after calculation.",
                     "files": [
-                        {"extension": ".out", "description": "Main output log with all calculation details"},
-                        {"extension": ".gbw", "description": "Gaussian basis set wavefunction file (orbitals)"},
-                        {"extension": ".hessian", "description": "Hessian matrix from frequency calculations"},
-                        {"extension": ".cit", "description": "CI vectors for excited state calculations"},
-                        {"extension": ".engrad", "description": "Energy and gradient for geometry optimizations"},
+                        {
+                            "extension": ".out",
+                            "description": "Main output log with all calculation details",
+                        },
+                        {
+                            "extension": ".gbw",
+                            "description": "Gaussian basis set wavefunction file (orbitals)",
+                        },
+                        {
+                            "extension": ".hessian",
+                            "description": "Hessian matrix from frequency calculations",
+                        },
+                        {
+                            "extension": ".cit",
+                            "description": "CI vectors for excited state calculations",
+                        },
+                        {
+                            "extension": ".engrad",
+                            "description": "Energy and gradient for geometry optimizations",
+                        },
                         {"extension": ".inp", "description": "Echo of the input file"},
-                        {"extension": ".molden", "description": "Orbitals in Molden format for visualization"},
+                        {
+                            "extension": ".molden",
+                            "description": "Orbitals in Molden format for visualization",
+                        },
                         {"extension": ".xyz", "description": "Final geometry in XYZ format"},
                         {"extension": ".prop", "description": "Molecular properties"},
                     ],
@@ -678,7 +695,16 @@ class AgentAPIProvider:
             },
             "file_types": {
                 "input": [".inp"],
-                "output": [".out", ".gbw", ".hessian", ".cit", ".engrad", ".molden", ".xyz", ".prop"],
+                "output": [
+                    ".out",
+                    ".gbw",
+                    ".hessian",
+                    ".cit",
+                    ".engrad",
+                    ".molden",
+                    ".xyz",
+                    ".prop",
+                ],
                 "auxiliary": [".moinp", ".cis", ".cisp", ".nto"],
             },
         }
@@ -777,7 +803,9 @@ class AgentAPIProvider:
             all_items = _collect_simple_line_suggestions()
             lower_prefix = prefix.lower()
             if lower_prefix:
-                all_items = [item for item in all_items if item["token"].lower().startswith(lower_prefix)]
+                all_items = [
+                    item for item in all_items if item["token"].lower().startswith(lower_prefix)
+                ]
             return all_items
 
         # After %  -> key block names
@@ -808,7 +836,11 @@ class AgentAPIProvider:
             for elem in ELEMENTS:
                 if elem.lower().startswith(elem_prefix.lower()):
                     suggestions.append(
-                        {"token": elem, "type": "element", "description": f"Chemical element {elem}"}
+                        {
+                            "token": elem,
+                            "type": "element",
+                            "description": f"Chemical element {elem}",
+                        }
                     )
             return suggestions
 
@@ -1101,16 +1133,16 @@ class AgentAPIProvider:
             RULE_INVALID_CHARGE,
             RULE_INVALID_MULTIPLICITY,
             RULE_MALFORMED_PAL,
+            RULE_MAXITER_RANGE,
             RULE_MISSING_COORD_TERMINATOR,
             RULE_MISSING_MAXCORE,
             RULE_MISSING_METHOD_BASIS,
             RULE_MISSING_XYZ_HEADER,
-            RULE_NPROCS_HIGH,
             RULE_NONSTANDARD_TOKEN,
-            RULE_MAXITER_RANGE,
+            RULE_NPROCS_HIGH,
+            RULE_UNCLOSED_BLOCK,
             RULE_UNKNOWN_BLOCK,
             RULE_UNKNOWN_TOKEN,
-            RULE_UNCLOSED_BLOCK,
         )
         from ..features.test_runner import (
             RULE_LOG_INPUT_PARSE_ERROR,
@@ -1230,8 +1262,7 @@ class AgentAPIProvider:
         manifest = self.get_rule_manifest()
         codes = {r["code"] for r in manifest}
         has_required_fields = all(
-            "code" in r and "severity" in r and "description" in r
-            for r in manifest
+            "code" in r and "severity" in r and "description" in r for r in manifest
         )
         checks.append(
             {
