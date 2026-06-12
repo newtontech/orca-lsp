@@ -46,10 +46,7 @@ from lsprotocol.types import (
 
 from ..keywords import (
     ALL_KEYWORDS,
-    BASIS_SETS,
-    DFT_FUNCTIONALS,
     PERCENT_BLOCKS,
-    WAVEFUNCTION_METHODS,
 )
 from ..parser import ORCAParser, ParseResult, PercentBlock
 
