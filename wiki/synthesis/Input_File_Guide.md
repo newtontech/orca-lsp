@@ -1,0 +1,274 @@
+# 输入文件指南 / Input File Guide
+
+> 创建日期：2026-06-12
+> 最后更新：2026-06-12
+> 覆盖来源：5
+
+## 核心论点 / Core Argument
+
+ORCA输入文件采用三段式结构：简单输入行（!）、%块和几何部分。理解每部分的作用和语法是编写有效输入的关键。
+
+## 文件结构 / File Structure
+
+```
+! [方法] [基组] [作业类型] [其他选项]
+[%块名称
+  参数
+end]
+
+* [坐标格式] [电荷] [多重度]
+  [原子] [x] [y] [z]
+  ...
+*
+```
+
+## 第一部分：简单输入行 / Simple Input Line
+
+### 基本语法
+
+```orca
+! B3LYP def2-TZVP OPT FREQ
+```
+
+### 组成部分
+
+1. **方法**：DFT泛函或波函数方法
+   - DFT：B3LYP、PBE0、ωB97X-D
+   - 波函数：HF、MP2、CCSD(T)、DLPNO-CCSD(T)
+
+2. **基组**：可选多个基组
+   - 主基组：def2-TZVP、cc-pVTZ、6-31G*
+   - 辅助基组：def2/J、def2-TZVP/C
+
+3. **作业类型**：计算类型
+   - SP、OPT、FREQ、TS、IRC、SCAN
+
+4. **其他选项**：色散、溶剂等
+   - D3、D3BJ、D4
+   - CPCM(Water)
+
+### 示例
+
+```orca
+# DFT优化+频率
+! B3LYP def2-TZVP OPT FREQ D3BJ
+
+# 高精度单点
+! DLPNO-CCSD(T) def2-TZVPP def2-TZVPP/C SP
+
+# 激发态
+! TD-DFT CAM-B3LYP aug-cc-pVTZ SP
+
+# 溶剂化
+! B3LYP def2-SVP OPT CPCM(Water) D3
+```
+
+## 第二部分：%块 / Percent Blocks
+
+### %maxcore：内存设置
+
+```orca
+%maxcore 4000
+```
+
+推荐值：
+- 小体系：1000-2000 MB
+- 大体系：4000-8000 MB
+
+### %pal：并行设置
+
+```orca
+%pal nprocs 4 end
+```
+
+### %scf：SCF收敛
+
+```orca
+%scf
+  maxiter 100
+  conv 6
+end
+```
+
+### %geom：几何优化
+
+```orca
+%geom
+  maxiter 50
+  Calc_Hess true
+  Recalc_Hess 5
+end
+```
+
+### %tddft：TD-DFT
+
+```orca
+%tddft
+  nroots 10
+  maxdim 100
+end
+```
+
+### %cpcm：溶剂化
+
+```orca
+%cpcm
+  epsilon 80.4
+  refrac 1.33
+end
+```
+
+## 第三部分：几何部分 / Geometry Section
+
+### XYZ格式（最常用）
+
+```orca
+* xyz [电荷] [多重度]
+  [元素] [x] [y] [z]
+  [元素] [x] [y] [z]
+  ...
+*
+```
+
+### 示例：水分子
+
+```orca
+* xyz 0 1
+  O   0.000000   0.000000   0.000000
+  H   0.757160   0.586260   0.000000
+  H  -0.757160   0.586260   0.000000
+*
+```
+
+### 电荷和多重度
+
+| 体系 | 电荷 | 多重度 | 说明 |
+|------|------|--------|------|
+| 中性闭壳层 | 0 | 1 | 如H₂O、CH₄ |
+| 阳离子 | 1 | 2 | 单电子 |
+| 阴离子 | -1 | 2 | 如OH⁻ |
+| 三线态 | 0 | 3 | 如O₂ |
+
+### 内坐标格式
+
+```orca
+* int
+  geometry {
+    O
+    H 1 R
+    H 1 R 2 A
+  }
+  values {
+    R = 0.96
+    A = 104.5
+  }
+*
+```
+
+## 完整示例 / Complete Examples
+
+### 示例1：基础优化
+
+```orca
+! B3LYP def2-TZVP OPT FREQ D3BJ
+%maxcore 4000
+%pal nprocs 4 end
+
+* xyz 0 1
+  C   0.000000   0.000000   0.000000
+  O   1.200000   0.000000   0.000000
+  H  -0.500000   0.900000   0.000000
+  H  -0.500000  -0.900000   0.000000
+*
+```
+
+### 示例2：高精度单点
+
+```orca
+! DLPNO-CCSD(T) def2-TZVPP def2-TZVPP/C SP
+%maxcore 8000
+%pal nprocs 8 end
+%method D3BJ end
+
+* xyz 0 1
+  C   1.390000   0.000000   0.000000
+  C   0.695000   1.203781   0.000000
+  C  -0.695000   1.203781   0.000000
+  C  -1.390000   0.000000   0.000000
+  C  -0.695000  -1.203781   0.000000
+  C   0.695000  -1.203781   0.000000
+  H   2.470000   0.000000   0.000000
+  H   1.235000   2.139088   0.000000
+  H  -1.235000   2.139088   0.000000
+  H  -2.470000   0.000000   0.000000
+  H  -1.235000  -2.139088   0.000000
+  H   1.235000  -2.139088   0.000000
+*
+```
+
+### 示例3：TD-DFT激发态
+
+```orca
+! B3LYP def2-TZVP SP
+%maxcore 4000
+%pal nprocs 4 end
+%tddft
+  nroots 10
+  maxdim 100
+end
+
+* xyz 0 1
+  C   0.000000   0.000000   0.000000
+  O   1.200000   0.000000   0.000000
+  H  -0.500000   0.900000   0.000000
+  H  -0.500000  -0.900000   0.000000
+*
+```
+
+## 常见错误 / Common Errors
+
+### 缺失方法或基组
+
+```orca
+# 错误
+! OPT
+
+# 正确
+! B3LYP def2-TZVP OPT
+```
+
+### 缺失几何部分
+
+```orca
+# 错误
+! B3LYP def2-TZVP SP
+
+# 正确
+! B3LYP def2-TZVP SP
+* xyz 0 1
+  C 0 0 0
+  H 1 0 0
+*
+```
+
+### 无效元素符号
+
+```orca
+# 错误
+* xyz 0 1
+  Hh 0 0 0
+*
+
+# 正确
+* xyz 0 1
+  H 0 0 0
+*
+```
+
+## 来源列表 / Source List
+
+- `raw/assets/README.md`
+- `raw/assets/examples/water.inp`
+- `raw/assets/examples/benzene.inp`
+- `raw/assets/examples/td_dft.inp`
+- `raw/assets/examples/solvation.inp`

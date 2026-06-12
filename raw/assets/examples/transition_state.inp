@@ -1,0 +1,15 @@
+# Transition state optimization using TS
+! B3LYP def2-TZVP TS
+%maxcore 4000
+%pal nprocs 8 end
+%geom
+  Calc_Hess true
+  Recalc_Hess 5
+end
+
+* xyz 0 1
+  C   0.000000   0.000000   0.000000
+  O   1.200000   0.000000   0.000000
+  H  -0.500000   0.900000   0.000000
+  H  -0.500000  -0.900000   0.000000
+*
