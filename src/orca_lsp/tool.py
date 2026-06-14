@@ -36,17 +36,168 @@ def _collect_diagnostics(path: Path) -> list[Any]:
     return diagnostics
 
 
+def _load_intent(path: Path) -> dict[str, Any] | None:
+    """Load the optional preflight intent contract for a case directory.
+
+    The intent contract is the only place preflight policy overrides live
+    (e.g. ``software_version``, ``scf_maxiter_warning``). It is a
+    workspace-local artifact, never a MatMaster/Bohrium runtime concept.
+    """
+    case_dir = path if path.is_dir() else path.parent
+    intent_path = case_dir / ".orca-lsp" / "intent.json"
+    if not intent_path.exists():
+        return None
+    try:
+        data = json.loads(intent_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    return data if isinstance(data, dict) else None
+
+
+def _looks_like_workspace(case_dir: Path) -> bool:
+    """True when a directory is a real generated-input ORCA workspace.
+
+    Preflight needs at least one ORCA input file (``*.inp`` or a file whose
+    content begins with a ``!`` simple-input line / ``%`` block) to build a
+    meaningful cross-artifact graph; a directory with only unrelated files
+    falls back to the legacy single-file lint path.
+    """
+    if not case_dir.is_dir():
+        return False
+    if any(case_dir.glob("*.inp")):
+        return True
+    for candidate in case_dir.iterdir():
+        if not candidate.is_file():
+            continue
+        try:
+            head = candidate.read_text(encoding="utf-8", errors="ignore")[:512]
+        except OSError:
+            continue
+        for line in head.splitlines():
+            stripped = line.strip()
+            if not stripped or stripped.startswith("#"):
+                continue
+            return stripped.startswith("!") or stripped.startswith("%")
+    return False
+
+
+def _resolve_primary_input(case_dir: Path) -> Path | None:
+    """Locate the primary ORCA input inside a case directory."""
+    inp_files = sorted(case_dir.glob("*.inp"))
+    if inp_files:
+        return inp_files[0]
+    for candidate in sorted(case_dir.iterdir()):
+        if not candidate.is_file():
+            continue
+        try:
+            head = candidate.read_text(encoding="utf-8", errors="ignore")[:512]
+        except OSError:
+            continue
+        for line in head.splitlines():
+            stripped = line.strip()
+            if not stripped or stripped.startswith("#"):
+                continue
+            if stripped.startswith("!") or stripped.startswith("%"):
+                return candidate
+            break
+    return None
+
+
+def _collect_preflight(
+    case_dir: Path, intent: dict[str, Any] | None
+) -> tuple[list[Any], list[dict[str, Any]], dict[str, Any]]:
+    """Return (preflight_diagnostics, artifact_graph, version_assumption).
+
+    Imported lazily so callers that never touch preflight (e.g. single-file
+    LSP hover) pay no import cost.
+    """
+    from .preflight import preflight_diagnostics, resolve_version_assumption
+
+    input_path = _resolve_primary_input(case_dir)
+    if input_path is None:
+        return [], [], resolve_version_assumption(intent)
+    diagnostics, graph = preflight_diagnostics(case_dir, input_path, intent=intent)
+    version_assumption = resolve_version_assumption(intent)
+    return diagnostics, graph.to_json(), version_assumption
+
+
 def check_path(path: Path) -> dict[str, Any]:
-    uri = path.resolve().as_uri()
-    diagnostics = _collect_diagnostics(path)
+    intent = _load_intent(path)
+    artifacts: list[dict[str, Any]] = []
+    version_assumption: dict[str, Any] | None = None
+    # When the caller passes a directory that looks like a real ORCA workspace,
+    # run the universal preflight checks against the primary input file. When
+    # the caller passes a single input file, keep the legacy single-file lint
+    # behavior so existing consumers that lint one file at a time are
+    # unaffected (no flood of blocking missing-artifact errors).
+    if path.is_dir():
+        if _looks_like_workspace(path):
+            preflight, artifacts, version_assumption = _collect_preflight(path, intent)
+            diagnostics: list[Any] = list(preflight)
+        else:
+            diagnostics = []
+    else:
+        diagnostics = _collect_diagnostics(path)
+    uri = (path if path.is_dir() else path.resolve()).resolve().as_uri()
     return agent_check_payload(
         software=SOFTWARE,
         uri=uri,
         operation="check",
         diagnostics=diagnostics,
         path=str(path),
-        file_type=_file_type(path),
+        file_type=_file_type(path) if not path.is_dir() else "case-dir",
+        intent=intent,
+        version_assumption=version_assumption,
+        artifacts=artifacts,
     )
+
+
+def preflight_path(path: Path) -> dict[str, Any]:
+    """Return a preflight-only payload (universal checks, no legacy lint)."""
+    from .preflight import preflight_diagnostics, resolve_version_assumption
+
+    intent = _load_intent(path)
+    case_dir = path if path.is_dir() else path.parent
+    input_path = _resolve_primary_input(case_dir) or (case_dir / "input.inp")
+    diagnostics, graph = preflight_diagnostics(case_dir, input_path, intent=intent)
+    version_assumption = resolve_version_assumption(intent)
+    payload = agent_check_payload(
+        software=SOFTWARE,
+        uri=case_dir.resolve().as_uri(),
+        operation="preflight",
+        diagnostics=diagnostics,
+        path=str(case_dir),
+        file_type="case-dir",
+        intent=intent,
+        version_assumption=version_assumption,
+        artifacts=graph.to_json(),
+    )
+    return with_capabilities(payload, "preflight")
+
+
+def manifest_path(path: Path | None = None) -> dict[str, Any]:
+    """Return the fleet preflight manifest.
+
+    When ``path`` is given, fixture expectations declared in
+    ``.orca-lsp/fixtures.json`` are merged in so the parent probe can confirm
+    a case directory exercises the documented codes.
+    """
+    from .preflight import fleet_manifest
+
+    fixtures: list[dict[str, Any]] = []
+    if path is not None:
+        case_dir = path if path.is_dir() else path.parent
+        fixtures_path = case_dir / ".orca-lsp" / "fixtures.json"
+        if fixtures_path.exists():
+            try:
+                data = json.loads(fixtures_path.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                data = None
+            if isinstance(data, list):
+                fixtures = [item for item in data if isinstance(item, dict)]
+            elif isinstance(data, dict) and isinstance(data.get("fixtures"), list):
+                fixtures = [item for item in data["fixtures"] if isinstance(item, dict)]
+    return fleet_manifest(fixtures=fixtures)
 
 
 def _operation_payload(
@@ -69,9 +220,26 @@ def _operation_payload(
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="orca-lsp-tool")
     subparsers = parser.add_subparsers(dest="operation", required=True)
-    for operation in ("check", "context", "complete", "hover", "symbols", "fix"):
+    for operation in (
+        "check",
+        "preflight",
+        "manifest",
+        "context",
+        "complete",
+        "hover",
+        "symbols",
+        "fix",
+    ):
         sub = subparsers.add_parser(operation)
-        sub.add_argument("path", type=Path)
+        if operation == "manifest":
+            sub.add_argument(
+                "path",
+                type=Path,
+                nargs="?",
+                help="Optional case directory to merge fixture expectations from.",
+            )
+        else:
+            sub.add_argument("path", type=Path)
         sub.add_argument("--format", choices=["json"], default="json")
         sub.add_argument(
             "--line",
@@ -87,11 +255,21 @@ def main(argv: list[str] | None = None) -> int:
         )
         if operation == "check":
             sub.add_argument("--fail-on-blocking", action="store_true")
+        if operation == "preflight":
+            sub.add_argument("--fail-on-blocking", action="store_true")
     args = parser.parse_args(argv)
     if args.operation == "check":
         payload = with_capabilities(check_path(args.path), "check")
         print(json.dumps(payload, indent=2, sort_keys=True))
         return 1 if getattr(args, "fail_on_blocking", False) and not payload["ok"] else 0
+    if args.operation == "preflight":
+        payload = preflight_path(args.path)
+        print(json.dumps(payload, indent=2, sort_keys=True))
+        return 1 if getattr(args, "fail_on_blocking", False) and not payload["ok"] else 0
+    if args.operation == "manifest":
+        payload = manifest_path(getattr(args, "path", None))
+        print(json.dumps(payload, indent=2, sort_keys=True))
+        return 0
     payload = _operation_payload(args.path, args.operation, args.line, args.character)
     print(json.dumps(payload, indent=2, sort_keys=True))
     return 0

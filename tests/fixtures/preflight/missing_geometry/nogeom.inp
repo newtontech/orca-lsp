@@ -1,0 +1,3 @@
+# Missing geometry block
+! B3LYP def2-TZVP SP
+%maxcore 4000
