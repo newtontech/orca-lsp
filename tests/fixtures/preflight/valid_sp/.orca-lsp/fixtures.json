@@ -1,0 +1,40 @@
+{
+  "fixtures": [
+    {
+      "name": "valid_sp",
+      "path": "tests/fixtures/preflight/valid_sp",
+      "expect_ok": true,
+      "expect_codes": []
+    },
+    {
+      "name": "basis_missing",
+      "path": "tests/fixtures/preflight/basis_missing",
+      "expect_ok": false,
+      "expect_codes": ["ORCA606"]
+    },
+    {
+      "name": "keyword_method_mismatch",
+      "path": "tests/fixtures/preflight/keyword_method_mismatch",
+      "expect_ok": false,
+      "expect_codes": ["ORCA609"]
+    },
+    {
+      "name": "low_maxiter",
+      "path": "tests/fixtures/preflight/low_maxiter",
+      "expect_ok": true,
+      "expect_codes": ["ORCA607"]
+    },
+    {
+      "name": "missing_geometry",
+      "path": "tests/fixtures/preflight/missing_geometry",
+      "expect_ok": false,
+      "expect_codes": ["ORCA602"]
+    },
+    {
+      "name": "unresolved_moinp",
+      "path": "tests/fixtures/preflight/unresolved_moinp",
+      "expect_ok": true,
+      "expect_codes": ["ORCA604"]
+    }
+  ]
+}

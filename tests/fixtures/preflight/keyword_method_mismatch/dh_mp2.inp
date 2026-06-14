@@ -1,0 +1,9 @@
+# Double-hybrid functional combined with explicit MP2 keyword
+! B2PLYP def2-TZVP MP2 SP
+%maxcore 4000
+
+* xyz 0 1
+  O   0.000000   0.000000   0.000000
+  H   0.757160   0.586260   0.000000
+  H  -0.757160   0.586260   0.000000
+*
