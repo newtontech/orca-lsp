@@ -1,0 +1,637 @@
+{
+  "docstrings": [
+    {
+      "path": "src/orca_lsp/__init__.py",
+      "symbol": "Language_Server_Protocol",
+      "wikiPath": "wiki/entities/Language_Server_Protocol.md"
+    },
+    {
+      "path": "src/orca_lsp/agent_lsp.py",
+      "symbol": "Diagnostic_Engine_v1",
+      "wikiPath": "wiki/entities/Diagnostic_Engine_v1.md"
+    },
+    {
+      "path": "src/orca_lsp/agent_lsp.py",
+      "symbol": "Diagnostics_Catalog",
+      "wikiPath": "wiki/synthesis/Diagnostics_Catalog.md"
+    },
+    {
+      "path": "src/orca_lsp/agent_operations.py",
+      "symbol": "Diagnostic_Engine_v1",
+      "wikiPath": "wiki/entities/Diagnostic_Engine_v1.md"
+    },
+    {
+      "path": "src/orca_lsp/agent_operations.py",
+      "symbol": "Diagnostics_Catalog",
+      "wikiPath": "wiki/synthesis/Diagnostics_Catalog.md"
+    },
+    {
+      "path": "src/orca_lsp/features/__init__.py",
+      "symbol": "ORCA_Quantum_Chemistry",
+      "wikiPath": "wiki/entities/ORCA_Quantum_Chemistry.md"
+    },
+    {
+      "path": "src/orca_lsp/features/agent_api.py",
+      "symbol": "ORCA_LSP_API_Reference",
+      "wikiPath": "wiki/synthesis/ORCA_LSP_API_Reference.md"
+    },
+    {
+      "path": "src/orca_lsp/features/agent_api.py",
+      "symbol": "Geometry_Section",
+      "wikiPath": "wiki/entities/Geometry_Section.md"
+    },
+    {
+      "path": "src/orca_lsp/features/agent_api.py",
+      "symbol": "Percent_Blocks",
+      "wikiPath": "wiki/entities/Percent_Blocks.md"
+    },
+    {
+      "path": "src/orca_lsp/features/agent_api.py",
+      "symbol": "Auxiliary_Basis_Sets",
+      "wikiPath": "wiki/entities/Auxiliary_Basis_Sets.md"
+    },
+    {
+      "path": "src/orca_lsp/features/agent_api.py",
+      "symbol": "Element_Symbols",
+      "wikiPath": "wiki/entities/Element_Symbols.md"
+    },
+    {
+      "path": "src/orca_lsp/features/agent_api.py",
+      "symbol": "Geometry_Optimization",
+      "wikiPath": "wiki/concepts/Geometry_Optimization.md"
+    },
+    {
+      "path": "src/orca_lsp/features/agent_api.py",
+      "symbol": "Diagnostics_Catalog",
+      "wikiPath": "wiki/synthesis/Diagnostics_Catalog.md"
+    },
+    {
+      "path": "src/orca_lsp/features/code_actions.py",
+      "symbol": "Diagnostic_Engine_v1",
+      "wikiPath": "wiki/entities/Diagnostic_Engine_v1.md"
+    },
+    {
+      "path": "src/orca_lsp/features/code_actions.py",
+      "symbol": "Diagnostics_Catalog",
+      "wikiPath": "wiki/synthesis/Diagnostics_Catalog.md"
+    },
+    {
+      "path": "src/orca_lsp/features/code_actions.py",
+      "symbol": "Percent_Blocks",
+      "wikiPath": "wiki/entities/Percent_Blocks.md"
+    },
+    {
+      "path": "src/orca_lsp/features/code_actions.py",
+      "symbol": "Geometry_Section",
+      "wikiPath": "wiki/entities/Geometry_Section.md"
+    },
+    {
+      "path": "src/orca_lsp/features/diagnostic.py",
+      "symbol": "Diagnostics_Catalog",
+      "wikiPath": "wiki/synthesis/Diagnostics_Catalog.md"
+    },
+    {
+      "path": "src/orca_lsp/features/diagnostic.py",
+      "symbol": "Diagnostic_Engine_v1",
+      "wikiPath": "wiki/entities/Diagnostic_Engine_v1.md"
+    },
+    {
+      "path": "src/orca_lsp/features/formatting.py",
+      "symbol": "Input_File_Guide",
+      "wikiPath": "wiki/synthesis/Input_File_Guide.md"
+    },
+    {
+      "path": "src/orca_lsp/features/formatting.py",
+      "symbol": "Language_Server_Protocol",
+      "wikiPath": "wiki/entities/Language_Server_Protocol.md"
+    },
+    {
+      "path": "src/orca_lsp/features/formatting.py",
+      "symbol": "ORCA_Output_Guide",
+      "wikiPath": "wiki/synthesis/ORCA_Output_Guide.md"
+    },
+    {
+      "path": "src/orca_lsp/features/formatting.py",
+      "symbol": "Geometry_Section",
+      "wikiPath": "wiki/entities/Geometry_Section.md"
+    },
+    {
+      "path": "src/orca_lsp/features/formatting.py",
+      "symbol": "Percent_Blocks",
+      "wikiPath": "wiki/entities/Percent_Blocks.md"
+    },
+    {
+      "path": "src/orca_lsp/features/lint.py",
+      "symbol": "Diagnostics_Catalog",
+      "wikiPath": "wiki/synthesis/Diagnostics_Catalog.md"
+    },
+    {
+      "path": "src/orca_lsp/features/lint.py",
+      "symbol": "Geometry_Optimization",
+      "wikiPath": "wiki/concepts/Geometry_Optimization.md"
+    },
+    {
+      "path": "src/orca_lsp/features/navigation.py",
+      "symbol": "Element_Symbols",
+      "wikiPath": "wiki/entities/Element_Symbols.md"
+    },
+    {
+      "path": "src/orca_lsp/features/navigation.py",
+      "symbol": "Input_File_Guide",
+      "wikiPath": "wiki/synthesis/Input_File_Guide.md"
+    },
+    {
+      "path": "src/orca_lsp/features/navigation.py",
+      "symbol": "Percent_Blocks",
+      "wikiPath": "wiki/entities/Percent_Blocks.md"
+    },
+    {
+      "path": "src/orca_lsp/features/navigation.py",
+      "symbol": "Geometry_Section",
+      "wikiPath": "wiki/entities/Geometry_Section.md"
+    },
+    {
+      "path": "src/orca_lsp/features/navigation.py",
+      "symbol": "ORCA_Official_Documentation",
+      "wikiPath": "wiki/entities/ORCA_Official_Documentation.md"
+    },
+    {
+      "path": "src/orca_lsp/features/regression.py",
+      "symbol": "Diagnostics_Catalog",
+      "wikiPath": "wiki/synthesis/Diagnostics_Catalog.md"
+    },
+    {
+      "path": "src/orca_lsp/features/rename.py",
+      "symbol": "Input_File_Guide",
+      "wikiPath": "wiki/synthesis/Input_File_Guide.md"
+    },
+    {
+      "path": "src/orca_lsp/features/rename.py",
+      "symbol": "Auxiliary_Basis_Sets",
+      "wikiPath": "wiki/entities/Auxiliary_Basis_Sets.md"
+    },
+    {
+      "path": "src/orca_lsp/features/rename.py",
+      "symbol": "Geometry_Section",
+      "wikiPath": "wiki/entities/Geometry_Section.md"
+    },
+    {
+      "path": "src/orca_lsp/features/rename.py",
+      "symbol": "Percent_Blocks",
+      "wikiPath": "wiki/entities/Percent_Blocks.md"
+    },
+    {
+      "path": "src/orca_lsp/features/test_runner.py",
+      "symbol": "Geometry_Optimization",
+      "wikiPath": "wiki/concepts/Geometry_Optimization.md"
+    },
+    {
+      "path": "src/orca_lsp/features/test_runner.py",
+      "symbol": "Diagnostic_Engine_v1",
+      "wikiPath": "wiki/entities/Diagnostic_Engine_v1.md"
+    },
+    {
+      "path": "src/orca_lsp/features/test_runner.py",
+      "symbol": "Diagnostics_Catalog",
+      "wikiPath": "wiki/synthesis/Diagnostics_Catalog.md"
+    },
+    {
+      "path": "src/orca_lsp/features/typecheck.py",
+      "symbol": "Diagnostics_Catalog",
+      "wikiPath": "wiki/synthesis/Diagnostics_Catalog.md"
+    },
+    {
+      "path": "src/orca_lsp/features/typecheck.py",
+      "symbol": "Geometry_Optimization",
+      "wikiPath": "wiki/concepts/Geometry_Optimization.md"
+    },
+    {
+      "path": "src/orca_lsp/features/typecheck.py",
+      "symbol": "Auxiliary_Basis_Sets",
+      "wikiPath": "wiki/entities/Auxiliary_Basis_Sets.md"
+    },
+    {
+      "path": "src/orca_lsp/keywords.py",
+      "symbol": "Transition_State_Search",
+      "wikiPath": "wiki/concepts/Transition_State_Search.md"
+    },
+    {
+      "path": "src/orca_lsp/parser.py",
+      "symbol": "Input_File_Guide",
+      "wikiPath": "wiki/synthesis/Input_File_Guide.md"
+    },
+    {
+      "path": "src/orca_lsp/parser.py",
+      "symbol": "Transition_State_Search",
+      "wikiPath": "wiki/concepts/Transition_State_Search.md"
+    },
+    {
+      "path": "src/orca_lsp/parser.py",
+      "symbol": "Percent_Blocks",
+      "wikiPath": "wiki/entities/Percent_Blocks.md"
+    },
+    {
+      "path": "src/orca_lsp/parser.py",
+      "symbol": "Geometry_Section",
+      "wikiPath": "wiki/entities/Geometry_Section.md"
+    },
+    {
+      "path": "src/orca_lsp/preflight.py",
+      "symbol": "Wavefunction_Methods",
+      "wikiPath": "wiki/entities/Wavefunction_Methods.md"
+    },
+    {
+      "path": "src/orca_lsp/preflight.py",
+      "symbol": "Auxiliary_Basis_Sets",
+      "wikiPath": "wiki/entities/Auxiliary_Basis_Sets.md"
+    },
+    {
+      "path": "src/orca_lsp/preflight.py",
+      "symbol": "Percent_Blocks",
+      "wikiPath": "wiki/entities/Percent_Blocks.md"
+    },
+    {
+      "path": "src/orca_lsp/preflight.py",
+      "symbol": "Element_Symbols",
+      "wikiPath": "wiki/entities/Element_Symbols.md"
+    },
+    {
+      "path": "src/orca_lsp/preflight.py",
+      "symbol": "Diagnostics_Catalog",
+      "wikiPath": "wiki/synthesis/Diagnostics_Catalog.md"
+    },
+    {
+      "path": "src/orca_lsp/rich_diagnostics.py",
+      "symbol": "Diagnostic_Engine_v1",
+      "wikiPath": "wiki/entities/Diagnostic_Engine_v1.md"
+    },
+    {
+      "path": "src/orca_lsp/rich_diagnostics.py",
+      "symbol": "Auxiliary_Basis_Sets",
+      "wikiPath": "wiki/entities/Auxiliary_Basis_Sets.md"
+    },
+    {
+      "path": "src/orca_lsp/server.py",
+      "symbol": "Language_Server_Protocol",
+      "wikiPath": "wiki/entities/Language_Server_Protocol.md"
+    },
+    {
+      "path": "src/orca_lsp/server.py",
+      "symbol": "Transition_State_Search",
+      "wikiPath": "wiki/concepts/Transition_State_Search.md"
+    },
+    {
+      "path": "src/orca_lsp/server.py",
+      "symbol": "Percent_Blocks",
+      "wikiPath": "wiki/entities/Percent_Blocks.md"
+    },
+    {
+      "path": "src/orca_lsp/server.py",
+      "symbol": "Auxiliary_Basis_Sets",
+      "wikiPath": "wiki/entities/Auxiliary_Basis_Sets.md"
+    },
+    {
+      "path": "src/orca_lsp/server.py",
+      "symbol": "Basis_Sets",
+      "wikiPath": "wiki/entities/Basis_Sets.md"
+    },
+    {
+      "path": "src/orca_lsp/tool.py",
+      "symbol": "Diagnostic_Engine_v1",
+      "wikiPath": "wiki/entities/Diagnostic_Engine_v1.md"
+    },
+    {
+      "path": "src/orca_lsp/tool.py",
+      "symbol": "Geometry_Optimization",
+      "wikiPath": "wiki/concepts/Geometry_Optimization.md"
+    },
+    {
+      "path": "src/orca_lsp/tool.py",
+      "symbol": "Input_File_Guide",
+      "wikiPath": "wiki/synthesis/Input_File_Guide.md"
+    },
+    {
+      "path": "src/orca_lsp/tool.py",
+      "symbol": "Auxiliary_Basis_Sets",
+      "wikiPath": "wiki/entities/Auxiliary_Basis_Sets.md"
+    },
+    {
+      "path": "src/orca_lsp/tool.py",
+      "symbol": "Diagnostics_Catalog",
+      "wikiPath": "wiki/synthesis/Diagnostics_Catalog.md"
+    },
+    {
+      "path": "src/orca_lsp/tool.py",
+      "symbol": "ORCA_Quantum_Chemistry",
+      "wikiPath": "wiki/entities/ORCA_Quantum_Chemistry.md"
+    },
+    {
+      "path": "src/orca_lsp/validator.py",
+      "symbol": "Element_Symbols",
+      "wikiPath": "wiki/entities/Element_Symbols.md"
+    },
+    {
+      "path": "src/orca_lsp/validator.py",
+      "symbol": "Transition_State_Search",
+      "wikiPath": "wiki/concepts/Transition_State_Search.md"
+    },
+    {
+      "path": "src/orca_lsp/validator.py",
+      "symbol": "Geometry_Section",
+      "wikiPath": "wiki/entities/Geometry_Section.md"
+    },
+    {
+      "path": "src/orca_lsp/validator.py",
+      "symbol": "Basis_Sets",
+      "wikiPath": "wiki/entities/Basis_Sets.md"
+    }
+  ],
+  "generatedAt": "2026-06-15T20:09:32Z",
+  "languageId": "orca",
+  "rawManifest": {
+    "ok": true,
+    "path": "raw/assets/manifest.json"
+  },
+  "repository": "https://github.com/newtontech/orca-lsp",
+  "ruleIds": [
+    {
+      "code": "ORCA-INPUT-SYNTAX-001",
+      "sourcePath": "src/orca_lsp/features/lint.py"
+    },
+    {
+      "code": "ORCA-INPUT-SYNTAX-002",
+      "sourcePath": "src/orca_lsp/features/lint.py"
+    },
+    {
+      "code": "ORCA-INPUT-SYNTAX-003",
+      "sourcePath": "src/orca_lsp/features/lint.py"
+    },
+    {
+      "code": "ORCA-INPUT-SYNTAX-004",
+      "sourcePath": "src/orca_lsp/features/lint.py"
+    },
+    {
+      "code": "ORCA-INPUT-VALIDATION-001",
+      "sourcePath": "src/orca_lsp/features/lint.py"
+    },
+    {
+      "code": "ORCA-INPUT-VALIDATION-002",
+      "sourcePath": "src/orca_lsp/features/lint.py"
+    },
+    {
+      "code": "ORCA-INPUT-VALIDATION-003",
+      "sourcePath": "src/orca_lsp/features/lint.py"
+    },
+    {
+      "code": "ORCA-INPUT-SYNTAX-020",
+      "sourcePath": "src/orca_lsp/features/lint.py"
+    },
+    {
+      "code": "ORCA-INPUT-VALIDATION-020",
+      "sourcePath": "src/orca_lsp/features/lint.py"
+    },
+    {
+      "code": "ORCA-INPUT-SYNTAX-021",
+      "sourcePath": "src/orca_lsp/features/lint.py"
+    },
+    {
+      "code": "ORCA-INPUT-SYNTAX-022",
+      "sourcePath": "src/orca_lsp/features/lint.py"
+    },
+    {
+      "code": "ORCA-INPUT-SYNTAX-023",
+      "sourcePath": "src/orca_lsp/features/lint.py"
+    },
+    {
+      "code": "ORCA-INPUT-SYNTAX-024",
+      "sourcePath": "src/orca_lsp/features/lint.py"
+    },
+    {
+      "code": "ORCA-INPUT-CONFIG-001",
+      "sourcePath": "src/orca_lsp/features/lint.py"
+    },
+    {
+      "code": "ORCA-INPUT-SYNTAX-050",
+      "sourcePath": "src/orca_lsp/features/lint.py"
+    },
+    {
+      "code": "ORCA-INPUT-SYNTAX-051",
+      "sourcePath": "src/orca_lsp/features/lint.py"
+    },
+    {
+      "code": "ORCA-INPUT-CONFIG-002",
+      "sourcePath": "src/orca_lsp/features/lint.py"
+    },
+    {
+      "code": "ORCA-INPUT-CONFIG-003",
+      "sourcePath": "src/orca_lsp/features/lint.py"
+    },
+    {
+      "code": "ORCA-INPUT-CONFIG-020",
+      "sourcePath": "src/orca_lsp/features/lint.py"
+    },
+    {
+      "code": "ORCA-INPUT-CONFIG-021",
+      "sourcePath": "src/orca_lsp/features/lint.py"
+    },
+    {
+      "code": "ORCA-INPUT-TYPE-001",
+      "sourcePath": "src/orca_lsp/features/typecheck.py"
+    },
+    {
+      "code": "ORCA-INPUT-TYPE-002",
+      "sourcePath": "src/orca_lsp/features/typecheck.py"
+    },
+    {
+      "code": "ORCA-INPUT-TYPE-003",
+      "sourcePath": "src/orca_lsp/features/typecheck.py"
+    },
+    {
+      "code": "ORCA-INPUT-SCHEMA-001",
+      "sourcePath": "src/orca_lsp/features/typecheck.py"
+    },
+    {
+      "code": "ORCA-INPUT-SCHEMA-002",
+      "sourcePath": "src/orca_lsp/features/typecheck.py"
+    },
+    {
+      "code": "ORCA-INPUT-TYPE-004",
+      "sourcePath": "src/orca_lsp/features/typecheck.py"
+    }
+  ],
+  "schemaVersion": "openqc.lsp.traceability.v1",
+  "serverId": "orca-lsp",
+  "sourceUrls": [
+    {
+      "rawPath": "raw/assets/CHANGELOG.md",
+      "url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/CHANGELOG.md"
+    },
+    {
+      "rawPath": "raw/assets/DEVELOPMENT.md",
+      "url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/DEVELOPMENT.md"
+    },
+    {
+      "rawPath": "raw/assets/README.md",
+      "url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/README.md"
+    },
+    {
+      "rawPath": "raw/assets/docs/ARCHITECTURE.md",
+      "url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/docs/ARCHITECTURE.md"
+    },
+    {
+      "rawPath": "raw/assets/docs/CONTRIBUTING.md",
+      "url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/docs/CONTRIBUTING.md"
+    },
+    {
+      "rawPath": "raw/assets/docs/DIAGNOSTIC_ENGINE_V1.md",
+      "url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/docs/DIAGNOSTIC_ENGINE_V1.md"
+    },
+    {
+      "rawPath": "raw/assets/docs/OPENQC_ALIGNMENT.md",
+      "url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/docs/OPENQC_ALIGNMENT.md"
+    },
+    {
+      "rawPath": "raw/assets/docs/USER_GUIDE.md",
+      "url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/docs/USER_GUIDE.md"
+    },
+    {
+      "rawPath": "raw/assets/docs/agent-verification-loop.md",
+      "url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/docs/agent-verification-loop.md"
+    },
+    {
+      "rawPath": "raw/assets/examples/benzene.inp",
+      "url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/examples/benzene.inp"
+    },
+    {
+      "rawPath": "raw/assets/examples/camb3lyp.inp",
+      "url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/examples/camb3lyp.inp"
+    },
+    {
+      "rawPath": "raw/assets/examples/counterpoise.inp",
+      "url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/examples/counterpoise.inp"
+    },
+    {
+      "rawPath": "raw/assets/examples/ethylene.inp",
+      "url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/examples/ethylene.inp"
+    },
+    {
+      "rawPath": "raw/assets/examples/solvation.inp",
+      "url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/examples/solvation.inp"
+    },
+    {
+      "rawPath": "raw/assets/examples/td_dft.inp",
+      "url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/examples/td_dft.inp"
+    },
+    {
+      "rawPath": "raw/assets/examples/transition_state.inp",
+      "url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/examples/transition_state.inp"
+    },
+    {
+      "rawPath": "raw/assets/examples/water.inp",
+      "url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/examples/water.inp"
+    },
+    {
+      "rawPath": "raw/assets/manifest.json",
+      "url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/manifest.json"
+    },
+    {
+      "rawPath": "raw/assets/orca-basis-sets-reference.md",
+      "url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/orca-basis-sets-reference.md"
+    },
+    {
+      "rawPath": "raw/assets/orca-compound-jobs.md",
+      "url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/orca-compound-jobs.md"
+    },
+    {
+      "rawPath": "raw/assets/orca-examples.md",
+      "url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/orca-examples.md"
+    },
+    {
+      "rawPath": "raw/assets/orca-github-tools.md",
+      "url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/orca-github-tools.md"
+    },
+    {
+      "rawPath": "raw/assets/orca-input-format.md",
+      "url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/orca-input-format.md"
+    },
+    {
+      "rawPath": "raw/assets/orca-keywords-reference.md",
+      "url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/orca-keywords-reference.md"
+    },
+    {
+      "rawPath": "raw/assets/orca-output-format.md",
+      "url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/orca-output-format.md"
+    },
+    {
+      "rawPath": "raw/assets/orca-tutorials.md",
+      "url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/orca-tutorials.md"
+    }
+  ],
+  "summary": {
+    "brokenWikiLinks": 0,
+    "docstringsLinked": 69,
+    "docstringsTotal": 69,
+    "rawManifestFailures": 0,
+    "ruleIdsTotal": 26,
+    "sourceUrlsTotal": 26,
+    "wikiSourcesTotal": 11,
+    "wikiSourcesWithoutRaw": 0
+  },
+  "wikiSources": [
+    {
+      "rawPath": "raw/assets/orca-basis-sets-reference.md",
+      "sourceUrl": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/orca-basis-sets-reference.md",
+      "wikiPath": "wiki/concepts/Basis_Set_Selection.md"
+    },
+    {
+      "rawPath": "raw/assets/orca-compound-jobs.md",
+      "sourceUrl": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/orca-compound-jobs.md",
+      "wikiPath": "wiki/concepts/Compound_Jobs.md"
+    },
+    {
+      "rawPath": "raw/assets/orca-keywords-reference.md",
+      "sourceUrl": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/orca-keywords-reference.md",
+      "wikiPath": "wiki/concepts/Coupled_Cluster_Theory.md"
+    },
+    {
+      "rawPath": "raw/assets/orca-tutorials.md",
+      "sourceUrl": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/orca-tutorials.md",
+      "wikiPath": "wiki/concepts/Solvation_Models.md"
+    },
+    {
+      "rawPath": "raw/assets/docs/DIAGNOSTIC_ENGINE_V1.md",
+      "sourceUrl": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/docs/DIAGNOSTIC_ENGINE_V1.md",
+      "wikiPath": "wiki/entities/Diagnostic_Engine_v1.md"
+    },
+    {
+      "rawPath": "raw/assets/orca-input-format.md",
+      "sourceUrl": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/orca-input-format.md",
+      "wikiPath": "wiki/entities/Geometry_Section.md"
+    },
+    {
+      "rawPath": "raw/assets/docs/ARCHITECTURE.md",
+      "sourceUrl": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/docs/ARCHITECTURE.md",
+      "wikiPath": "wiki/entities/Language_Server_Protocol.md"
+    },
+    {
+      "rawPath": "raw/assets/orca-github-tools.md",
+      "sourceUrl": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/orca-github-tools.md",
+      "wikiPath": "wiki/entities/ORCA_GitHub_Tools.md"
+    },
+    {
+      "rawPath": "raw/assets/README.md",
+      "sourceUrl": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/README.md",
+      "wikiPath": "wiki/entities/ORCA_Quantum_Chemistry.md"
+    },
+    {
+      "rawPath": "raw/assets/docs/OPENQC_ALIGNMENT.md",
+      "sourceUrl": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/docs/OPENQC_ALIGNMENT.md",
+      "wikiPath": "wiki/entities/OpenQC_Alignment.md"
+    },
+    {
+      "rawPath": "raw/assets/orca-output-format.md",
+      "sourceUrl": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/orca-output-format.md",
+      "wikiPath": "wiki/synthesis/ORCA_Output_Guide.md"
+    }
+  ]
+}

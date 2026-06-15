@@ -1,0 +1,157 @@
+{
+  "entries": [
+    {
+      "path": "CHANGELOG.md",
+      "source_type": "raw_asset",
+      "source_url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/CHANGELOG.md",
+      "stable_id": "raw-assets-CHANGELOG-md"
+    },
+    {
+      "path": "DEVELOPMENT.md",
+      "source_type": "raw_asset",
+      "source_url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/DEVELOPMENT.md",
+      "stable_id": "raw-assets-DEVELOPMENT-md"
+    },
+    {
+      "path": "README.md",
+      "source_type": "raw_asset",
+      "source_url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/README.md",
+      "stable_id": "raw-assets-README-md"
+    },
+    {
+      "path": "docs/ARCHITECTURE.md",
+      "source_type": "raw_asset",
+      "source_url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/docs/ARCHITECTURE.md",
+      "stable_id": "raw-assets-docs-ARCHITECTURE-md"
+    },
+    {
+      "path": "docs/CONTRIBUTING.md",
+      "source_type": "raw_asset",
+      "source_url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/docs/CONTRIBUTING.md",
+      "stable_id": "raw-assets-docs-CONTRIBUTING-md"
+    },
+    {
+      "path": "docs/DIAGNOSTIC_ENGINE_V1.md",
+      "source_type": "raw_asset",
+      "source_url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/docs/DIAGNOSTIC_ENGINE_V1.md",
+      "stable_id": "raw-assets-docs-DIAGNOSTIC_ENGINE_V1-md"
+    },
+    {
+      "path": "docs/OPENQC_ALIGNMENT.md",
+      "source_type": "raw_asset",
+      "source_url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/docs/OPENQC_ALIGNMENT.md",
+      "stable_id": "raw-assets-docs-OPENQC_ALIGNMENT-md"
+    },
+    {
+      "path": "docs/USER_GUIDE.md",
+      "source_type": "raw_asset",
+      "source_url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/docs/USER_GUIDE.md",
+      "stable_id": "raw-assets-docs-USER_GUIDE-md"
+    },
+    {
+      "path": "docs/agent-verification-loop.md",
+      "source_type": "raw_asset",
+      "source_url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/docs/agent-verification-loop.md",
+      "stable_id": "raw-assets-docs-agent-verification-loop-md"
+    },
+    {
+      "path": "examples/benzene.inp",
+      "source_type": "raw_asset",
+      "source_url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/examples/benzene.inp",
+      "stable_id": "raw-assets-examples-benzene-inp"
+    },
+    {
+      "path": "examples/camb3lyp.inp",
+      "source_type": "raw_asset",
+      "source_url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/examples/camb3lyp.inp",
+      "stable_id": "raw-assets-examples-camb3lyp-inp"
+    },
+    {
+      "path": "examples/counterpoise.inp",
+      "source_type": "raw_asset",
+      "source_url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/examples/counterpoise.inp",
+      "stable_id": "raw-assets-examples-counterpoise-inp"
+    },
+    {
+      "path": "examples/ethylene.inp",
+      "source_type": "raw_asset",
+      "source_url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/examples/ethylene.inp",
+      "stable_id": "raw-assets-examples-ethylene-inp"
+    },
+    {
+      "path": "examples/solvation.inp",
+      "source_type": "raw_asset",
+      "source_url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/examples/solvation.inp",
+      "stable_id": "raw-assets-examples-solvation-inp"
+    },
+    {
+      "path": "examples/td_dft.inp",
+      "source_type": "raw_asset",
+      "source_url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/examples/td_dft.inp",
+      "stable_id": "raw-assets-examples-td_dft-inp"
+    },
+    {
+      "path": "examples/transition_state.inp",
+      "source_type": "raw_asset",
+      "source_url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/examples/transition_state.inp",
+      "stable_id": "raw-assets-examples-transition_state-inp"
+    },
+    {
+      "path": "examples/water.inp",
+      "source_type": "raw_asset",
+      "source_url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/examples/water.inp",
+      "stable_id": "raw-assets-examples-water-inp"
+    },
+    {
+      "path": "orca-basis-sets-reference.md",
+      "source_type": "raw_asset",
+      "source_url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/orca-basis-sets-reference.md",
+      "stable_id": "raw-assets-orca-basis-sets-reference-md"
+    },
+    {
+      "path": "orca-compound-jobs.md",
+      "source_type": "raw_asset",
+      "source_url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/orca-compound-jobs.md",
+      "stable_id": "raw-assets-orca-compound-jobs-md"
+    },
+    {
+      "path": "orca-examples.md",
+      "source_type": "raw_asset",
+      "source_url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/orca-examples.md",
+      "stable_id": "raw-assets-orca-examples-md"
+    },
+    {
+      "path": "orca-github-tools.md",
+      "source_type": "raw_asset",
+      "source_url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/orca-github-tools.md",
+      "stable_id": "raw-assets-orca-github-tools-md"
+    },
+    {
+      "path": "orca-input-format.md",
+      "source_type": "raw_asset",
+      "source_url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/orca-input-format.md",
+      "stable_id": "raw-assets-orca-input-format-md"
+    },
+    {
+      "path": "orca-keywords-reference.md",
+      "source_type": "raw_asset",
+      "source_url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/orca-keywords-reference.md",
+      "stable_id": "raw-assets-orca-keywords-reference-md"
+    },
+    {
+      "path": "orca-output-format.md",
+      "source_type": "raw_asset",
+      "source_url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/orca-output-format.md",
+      "stable_id": "raw-assets-orca-output-format-md"
+    },
+    {
+      "path": "orca-tutorials.md",
+      "source_type": "raw_asset",
+      "source_url": "https://github.com/newtontech/orca-lsp/blob/main/raw/assets/orca-tutorials.md",
+      "stable_id": "raw-assets-orca-tutorials-md"
+    }
+  ],
+  "manifest_version": "1.0.0",
+  "repository": "newtontech/orca-lsp",
+  "schema_version": "provenance-manifest-v1"
+}
