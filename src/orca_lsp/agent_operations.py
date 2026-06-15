@@ -388,12 +388,8 @@ _FIX_REFUSALS: dict[str, str] = {
         "SCF convergence requires input tuning (MaxIter, Guess, level shift); "
         "review ORCA manual before rerunning."
     ),
-    "ORCA-E025": (
-        "Runtime errors must be diagnosed from the log context before rerunning."
-    ),
-    "ORCA-E026": (
-        "Basis set errors require selecting a valid basis from the ORCA library."
-    ),
+    "ORCA-E025": ("Runtime errors must be diagnosed from the log context before rerunning."),
+    "ORCA-E026": ("Basis set errors require selecting a valid basis from the ORCA library."),
     "ORCA-W021": (
         "Auxiliary basis choice depends on the orbital basis; append the matching /C basis manually."
     ),

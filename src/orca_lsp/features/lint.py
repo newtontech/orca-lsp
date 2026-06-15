@@ -1129,9 +1129,7 @@ class LintProvider:
             return
 
         si = result.simple_input
-        route_tokens = [m.upper() for m in si.methods] + [
-            k.upper() for k in si.other_keywords
-        ]
+        route_tokens = [m.upper() for m in si.methods] + [k.upper() for k in si.other_keywords]
         uses_ri = any(token in _RI_METHOD_TOKENS for token in route_tokens)
         if not uses_ri:
             return
