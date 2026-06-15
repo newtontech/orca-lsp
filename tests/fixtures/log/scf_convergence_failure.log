@@ -1,0 +1,12 @@
+ORCA 5.0.4: Geometry Optimization
+===================
+
+...
+
+ITER   HSOS  DIIS          energy       -RMS-   -RMSDIIS-  DAMPING    Step    Time
+  1   0.0   1  -74.9631645075   2.000e-02   0.000e+00   0.000e+00   0.0000   0.0
+  2   0.0   2  -74.9631645075   2.000e-02   0.000e+00   0.000e+00   0.0000   0.0
+  3   0.0   3  -74.9631645075   2.000e-02   0.000e+00   0.000e+00   0.0000   0.0
+
+Error: SCF convergence failed! The SCF procedure did not converge!
+       Increase MaxIter or use a different convergence strategy.

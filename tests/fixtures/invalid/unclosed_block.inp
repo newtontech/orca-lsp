@@ -1,0 +1,9 @@
+! B3LYP def2-TZVP TightSCF
+
+%scf
+  MaxIter 300
+
+* xyz 0 1
+H  0.0  0.0  0.0
+H  0.0  0.0  0.74
+*

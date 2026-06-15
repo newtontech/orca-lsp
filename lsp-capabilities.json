@@ -1,0 +1,65 @@
+{
+  "name": "orca-lsp",
+  "version": "0.5.4",
+  "description": "Language Server Protocol for ORCA quantum chemistry software",
+  "diagnostic_engine": "1.0",
+  "source_provenance": [
+    {
+      "id": "orca-official-docs",
+      "name": "ORCA Official Documentation",
+      "url": "https://www.faccts.de/docs/orca/",
+      "type": "official_docs",
+      "version": "5.0.x",
+      "last_retrieved": "2025-01-15",
+      "license": "Proprietary (academic use)"
+    },
+    {
+      "id": "orca-input-format",
+      "name": "ORCA Input Format Reference",
+      "path": "raw/assets/orca-input-format.md",
+      "type": "local_reference",
+      "version": "5.0.x"
+    },
+    {
+      "id": "orca-keywords-reference",
+      "name": "ORCA Keywords Reference",
+      "path": "raw/assets/orca-keywords-reference.md",
+      "type": "local_reference",
+      "version": "5.0.x"
+    },
+    {
+      "id": "orca-basis-sets-reference",
+      "name": "ORCA Basis Sets Reference",
+      "path": "raw/assets/orca-basis-sets-reference.md",
+      "type": "local_reference",
+      "version": "5.0.x"
+    }
+  ],
+  "capabilities": {
+    "operations": ["check", "context", "complete", "hover", "symbols", "fix"],
+    "diagnostic_categories": [
+      "syntax",
+      "schema",
+      "type/value",
+      "cross-file reference",
+      "semantic consistency",
+      "preflight/runtime-risk",
+      "style/deprecation"
+    ],
+    "file_types": ["inp", "input", "orca"],
+    "rule_manifest": {
+      "path": "tests/fixtures/capabilities/openqc_smoke.json",
+      "expected_rule_count": 19
+    }
+  },
+  "openqc_compatibility": {
+    "smoke_checks": [
+      "rule_manifest",
+      "lint_engine_valid",
+      "lint_engine_invalid",
+      "validate_input",
+      "agent_api_snapshot"
+    ],
+    "log_rule_codes": ["ORCA-E024", "ORCA-E025"]
+  }
+}
