@@ -3,6 +3,20 @@
   "version": "0.5.4",
   "description": "Language Server Protocol for ORCA quantum chemistry software",
   "diagnostic_engine": "1.0",
+  "release_provenance": {
+    "version_file": "VERSION",
+    "changelog": "CHANGELOG.md",
+    "tag_policy": "Git tags SHOULD match the VERSION file at release time (semver).",
+    "supported_orca_versions": ["5.0.x"],
+    "capture_date": "2026-06-15",
+    "extraction_commit": "917e78bc5972d1ce1d6a304e4f9e6afd99a5a6b9",
+    "closed_loop_support": {
+      "status": "preview",
+      "log_diagnostics": true,
+      "fix_previews": true,
+      "requires_binary": false
+    }
+  },
   "source_provenance": [
     {
       "id": "orca-official-docs",
@@ -46,7 +60,7 @@
       "preflight/runtime-risk",
       "style/deprecation"
     ],
-    "file_types": ["inp", "input", "orca"],
+    "file_types": ["inp", "input", "orca", "log", "out"],
     "rule_manifest": {
       "path": "tests/fixtures/capabilities/openqc_smoke.json",
       "expected_rule_count": 19

@@ -1,71 +1,71 @@
 # ORCA LSP Provenance Report
 
-Generated: 2026-06-15T04:24:45Z
+Generated: 2026-06-15T08:48:20Z
 
 ## Raw Assets
 
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/raw/assets/orca-compound-jobs.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/raw/assets/orca-basis-sets-reference.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/raw/assets/CHANGELOG.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/raw/assets/orca-examples.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/raw/assets/docs/USER_GUIDE.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/raw/assets/docs/ARCHITECTURE.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/raw/assets/docs/OPENQC_ALIGNMENT.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/raw/assets/docs/DIAGNOSTIC_ENGINE_V1.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/raw/assets/docs/CONTRIBUTING.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/raw/assets/docs/agent-verification-loop.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/raw/assets/README.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/raw/assets/orca-input-format.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/raw/assets/orca-keywords-reference.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/raw/assets/examples/camb3lyp.inp
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/raw/assets/examples/solvation.inp
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/raw/assets/examples/counterpoise.inp
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/raw/assets/examples/ethylene.inp
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/raw/assets/examples/benzene.inp
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/raw/assets/examples/td_dft.inp
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/raw/assets/examples/transition_state.inp
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/raw/assets/examples/water.inp
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/raw/assets/orca-tutorials.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/raw/assets/DEVELOPMENT.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/raw/assets/orca-output-format.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/raw/assets/orca-github-tools.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/raw/assets/orca-compound-jobs.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/raw/assets/orca-basis-sets-reference.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/raw/assets/CHANGELOG.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/raw/assets/orca-examples.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/raw/assets/docs/USER_GUIDE.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/raw/assets/docs/ARCHITECTURE.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/raw/assets/docs/OPENQC_ALIGNMENT.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/raw/assets/docs/DIAGNOSTIC_ENGINE_V1.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/raw/assets/docs/CONTRIBUTING.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/raw/assets/docs/agent-verification-loop.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/raw/assets/README.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/raw/assets/orca-input-format.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/raw/assets/orca-keywords-reference.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/raw/assets/examples/camb3lyp.inp
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/raw/assets/examples/solvation.inp
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/raw/assets/examples/counterpoise.inp
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/raw/assets/examples/ethylene.inp
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/raw/assets/examples/benzene.inp
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/raw/assets/examples/td_dft.inp
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/raw/assets/examples/transition_state.inp
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/raw/assets/examples/water.inp
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/raw/assets/orca-tutorials.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/raw/assets/DEVELOPMENT.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/raw/assets/orca-output-format.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/raw/assets/orca-github-tools.md
 
 ## Wiki Pages
 
 ### Entities
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/wiki/entities/Job_Types.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/wiki/entities/Basis_Sets.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/wiki/entities/Wavefunction_Methods.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/wiki/entities/ORCA_Official_Documentation.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/wiki/entities/Element_Symbols.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/wiki/entities/Language_Server_Protocol.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/wiki/entities/OpenQC_Alignment.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/wiki/entities/Diagnostic_Engine_v1.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/wiki/entities/ORCA_Quantum_Chemistry.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/wiki/entities/Percent_Blocks.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/wiki/entities/Geometry_Section.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/wiki/entities/DFT_Functionals.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/wiki/entities/Auxiliary_Basis_Sets.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/wiki/entities/ORCA_GitHub_Tools.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/wiki/entities/Job_Types.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/wiki/entities/Basis_Sets.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/wiki/entities/Wavefunction_Methods.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/wiki/entities/ORCA_Official_Documentation.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/wiki/entities/Element_Symbols.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/wiki/entities/Language_Server_Protocol.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/wiki/entities/OpenQC_Alignment.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/wiki/entities/Diagnostic_Engine_v1.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/wiki/entities/ORCA_Quantum_Chemistry.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/wiki/entities/Percent_Blocks.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/wiki/entities/Geometry_Section.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/wiki/entities/DFT_Functionals.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/wiki/entities/Auxiliary_Basis_Sets.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/wiki/entities/ORCA_GitHub_Tools.md
 
 ### Concepts
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/wiki/concepts/Time_Dependent_DFT.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/wiki/concepts/Solvation_Models.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/wiki/concepts/Dispersion_Corrections.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/wiki/concepts/Frequency_Calculation.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/wiki/concepts/DLPNO_Methods.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/wiki/concepts/Transition_State_Search.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/wiki/concepts/Geometry_Optimization.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/wiki/concepts/Basis_Set_Selection.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/wiki/concepts/Density_Functional_Theory.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/wiki/concepts/Compound_Jobs.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/wiki/concepts/Coupled_Cluster_Theory.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/wiki/concepts/Time_Dependent_DFT.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/wiki/concepts/Solvation_Models.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/wiki/concepts/Dispersion_Corrections.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/wiki/concepts/Frequency_Calculation.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/wiki/concepts/DLPNO_Methods.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/wiki/concepts/Transition_State_Search.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/wiki/concepts/Geometry_Optimization.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/wiki/concepts/Basis_Set_Selection.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/wiki/concepts/Density_Functional_Theory.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/wiki/concepts/Compound_Jobs.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/wiki/concepts/Coupled_Cluster_Theory.md
 
 ### Synthesis
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/wiki/synthesis/Input_File_Guide.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/wiki/synthesis/ORCA_LSP_API_Reference.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/wiki/synthesis/ORCA_Output_Guide.md
-- /Users/yhm/Desktop/code/.worktrees/lsp-perfect-20260615-001/e-chem-preview/orca-lsp/wiki/synthesis/Diagnostics_Catalog.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/wiki/synthesis/Input_File_Guide.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/wiki/synthesis/ORCA_LSP_API_Reference.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/wiki/synthesis/ORCA_Output_Guide.md
+- /Users/yhm/Desktop/code/.worktrees/lsp-maturity-20260615-004/orca/orca-lsp/wiki/synthesis/Diagnostics_Catalog.md
 
 ## Rule Manifest
 

@@ -1,5 +1,15 @@
 # Change Log
-# Change Log
+
+## [0.5.5] - 2026-06-15
+
+### Added
+- `VERSION` file and `release_provenance` metadata in `lsp-capabilities.json` for OpenQC provenance gates
+- CLI `check` support for ORCA `.log`/`.out` fixtures with source-backed `ORCA-E024`/`ORCA-E025` diagnostics
+- Preview-only `fix` actions for unclosed `%` blocks (`ORCA-E003`) and missing coordinate terminators (`ORCA-E022`)
+
+### Changed
+- Log parser recognizes `SCF convergence failed` output snippets from official ORCA logs
+- `lsp-capabilities.json` documents closed-loop preview support without requiring ORCA binaries in CI
 
 ## [0.5.4] - 2026-03-05
 
