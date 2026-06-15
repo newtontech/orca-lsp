@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "orca-lsp"
-version = "0.5.4"
+version = "0.5.5rc1"
 description = "Language Server Protocol for ORCA quantum chemistry software"
 readme = "README.md"
 license = "MIT"
@@ -53,6 +53,10 @@ dev = [
 [project.scripts]
 orca-lsp = "orca_lsp.server:main"
 orca-lsp-tool = "orca_lsp.tool:main"
+
+
+[tool.hatch.build.force-include]
+"skill" = "skill"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/orca_lsp"]

@@ -1,0 +1,30 @@
+schema: scientific-lsp-skill/v1
+name: orca
+software: orca
+display_name: ORCA
+description: ORCA input preflight for generated .inp job files.
+package:
+  name: orca-lsp
+  install: pip install orca-lsp
+entrypoints:
+  server: orca-lsp
+  tool: orca-lsp-tool
+file_patterns:
+  - *.inp
+operations:
+  - capabilities
+  - check
+  - context
+  - complete
+  - hover
+  - symbols
+  - fix
+diagnostic_contract: DiagnosticEnvelope/v1
+blocking_policy:
+  mode: warning-only
+  description: Use --fail-on-blocking when generated inputs must be launch-ready.
+source_provenance:
+  -
+    kind: official_docs
+    label: ORCA manual
+    url: https://www.faccts.de/docs/orca/

@@ -9,9 +9,9 @@ from typing import Any
 
 from .agent_operations import operation_path, with_capabilities
 from .rich_diagnostics import agent_check_payload
+from .skill_export import export_skill, skill_spec_text
 
 SOFTWARE = "orca"
-
 
 def _file_type(path: Path) -> str:
     name = path.name.upper()
@@ -20,7 +20,6 @@ def _file_type(path: Path) -> str:
     if "." in path.name:
         return path.suffix.lstrip(".").lower()
     return name.lower()
-
 
 def _collect_diagnostics(path: Path) -> list[Any]:
     from .features.diagnostic import DiagnosticProvider
@@ -34,7 +33,6 @@ def _collect_diagnostics(path: Path) -> list[Any]:
     diagnostics.extend(LintProvider(parser).lint(text))
     diagnostics.extend(TypecheckProvider(parser).typecheck(text))
     return diagnostics
-
 
 def _load_intent(path: Path) -> dict[str, Any] | None:
     """Load the optional preflight intent contract for a case directory.
@@ -52,7 +50,6 @@ def _load_intent(path: Path) -> dict[str, Any] | None:
     except (OSError, ValueError):
         return None
     return data if isinstance(data, dict) else None
-
 
 def _looks_like_workspace(case_dir: Path) -> bool:
     """True when a directory is a real generated-input ORCA workspace.
@@ -80,7 +77,6 @@ def _looks_like_workspace(case_dir: Path) -> bool:
             return stripped.startswith("!") or stripped.startswith("%")
     return False
 
-
 def _resolve_primary_input(case_dir: Path) -> Path | None:
     """Locate the primary ORCA input inside a case directory."""
     inp_files = sorted(case_dir.glob("*.inp"))
@@ -102,7 +98,6 @@ def _resolve_primary_input(case_dir: Path) -> Path | None:
             break
     return None
 
-
 def _collect_preflight(
     case_dir: Path, intent: dict[str, Any] | None
 ) -> tuple[list[Any], list[dict[str, Any]], dict[str, Any]]:
@@ -119,7 +114,6 @@ def _collect_preflight(
     diagnostics, graph = preflight_diagnostics(case_dir, input_path, intent=intent)
     version_assumption = resolve_version_assumption(intent)
     return diagnostics, graph.to_json(), version_assumption
-
 
 def check_path(path: Path) -> dict[str, Any]:
     intent = _load_intent(path)
@@ -151,7 +145,6 @@ def check_path(path: Path) -> dict[str, Any]:
         artifacts=artifacts,
     )
 
-
 def preflight_path(path: Path) -> dict[str, Any]:
     """Return a preflight-only payload (universal checks, no legacy lint)."""
     from .preflight import preflight_diagnostics, resolve_version_assumption
@@ -173,7 +166,6 @@ def preflight_path(path: Path) -> dict[str, Any]:
         artifacts=graph.to_json(),
     )
     return with_capabilities(payload, "preflight")
-
 
 def manifest_path(path: Path | None = None) -> dict[str, Any]:
     """Return the fleet preflight manifest.
@@ -199,7 +191,6 @@ def manifest_path(path: Path | None = None) -> dict[str, Any]:
                 fixtures = [item for item in data["fixtures"] if isinstance(item, dict)]
     return fleet_manifest(fixtures=fixtures)
 
-
 def _operation_payload(
     path: Path,
     operation: str,
@@ -216,10 +207,15 @@ def _operation_payload(
         character=character,
     )
 
-
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="orca-lsp-tool")
     subparsers = parser.add_subparsers(dest="operation", required=True)
+    capabilities = subparsers.add_parser("capabilities")
+    capabilities.add_argument("--format", choices=["json"], default="json")
+    skill_spec = subparsers.add_parser("skill-spec")
+    skill_spec.add_argument("--format", choices=["json", "yaml"], default="json")
+    skill_export = subparsers.add_parser("skill-export")
+    skill_export.add_argument("--output", type=Path, required=True)
     for operation in (
         "check",
         "preflight",
@@ -258,6 +254,36 @@ def main(argv: list[str] | None = None) -> int:
         if operation == "preflight":
             sub.add_argument("--fail-on-blocking", action="store_true")
     args = parser.parse_args(argv)
+
+    if args.operation == "capabilities":
+        from .skill_export import SKILL_SPEC
+
+        payload = {
+            "schema": "OpenQCLspCapabilities",
+            "version": 1,
+            "id": SKILL_SPEC["package"]["name"],
+            "software": SKILL_SPEC["software"],
+            "displayName": SKILL_SPEC["display_name"],
+            "executable": SKILL_SPEC["entrypoints"]["server"],
+            "filePatterns": SKILL_SPEC["file_patterns"],
+            "capabilities": ["diagnostics", "rich-diagnostics", "completion", "hover", "symbols", "fix-preview", "pluggable-skill"],
+            "agentCli": {
+                "command": SKILL_SPEC["entrypoints"]["tool"],
+                "operations": SKILL_SPEC["operations"],
+                "jsonFormat": True,
+                "failOnBlocking": True,
+            },
+            "diagnosticContract": SKILL_SPEC["diagnostic_contract"],
+        }
+        print(json.dumps(payload, indent=2, sort_keys=True))
+        return 0
+
+    if args.operation == "skill-spec":
+        print(skill_spec_text(args.format))
+        return 0
+    if args.operation == "skill-export":
+        print(json.dumps(export_skill(args.output), indent=2, sort_keys=True))
+        return 0
     if args.operation == "check":
         payload = with_capabilities(check_path(args.path), "check")
         print(json.dumps(payload, indent=2, sort_keys=True))
@@ -273,7 +299,6 @@ def main(argv: list[str] | None = None) -> int:
     payload = _operation_payload(args.path, args.operation, args.line, args.character)
     print(json.dumps(payload, indent=2, sort_keys=True))
     return 0
-
 
 if __name__ == "__main__":
     raise SystemExit(main())
