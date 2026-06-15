@@ -10,7 +10,7 @@ entrypoints:
   server: orca-lsp
   tool: orca-lsp-tool
 file_patterns:
-  - *.inp
+  - "*.inp"
 operations:
   - capabilities
   - check
