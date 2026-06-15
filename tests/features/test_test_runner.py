@@ -83,6 +83,11 @@ class TestParseLogSCFNotConverged:
         assert d[0].code == RULE_LOG_SCF_NOT_CONVERGED
         assert "did not converge" in d[0].message
 
+    def test_scf_convergence_failed_phrase(self):
+        d = parse_log("Error: SCF convergence failed! The SCF procedure did not converge!\n")
+        assert len(d) == 1
+        assert d[0].code == RULE_LOG_SCF_NOT_CONVERGED
+
     def test_multiple_scf_failures(self):
         text = "Cycle 1\nSCF NOT CONVERGED\nCycle 2\nWARNING: SCF did not converge\n"
         d = parse_log(text)

@@ -39,6 +39,7 @@ from ..parser import ORCAParser
 from .lint import (
     RULE_DUPLICATE_BLOCK,
     RULE_DUPLICATE_TOKEN,
+    RULE_MISSING_COORD_TERMINATOR,
     RULE_MISSING_MAXCORE,
     RULE_UNCLOSED_BLOCK,
     RULE_UNKNOWN_BLOCK,
@@ -191,6 +192,7 @@ class CodeActionProvider:
             _RULE_INVALID_ENUM: self._fix_unknown_token,
             RULE_UNKNOWN_BLOCK: self._fix_unknown_block,
             RULE_UNCLOSED_BLOCK: self._fix_unclosed_block,
+            RULE_MISSING_COORD_TERMINATOR: self._fix_missing_coord_terminator,
             RULE_DUPLICATE_BLOCK: self._fix_duplicate_block,
             RULE_MISSING_MAXCORE: self._fix_missing_maxcore,
             RULE_DUPLICATE_TOKEN: self._fix_duplicate_token,
@@ -315,6 +317,34 @@ class CodeActionProvider:
         block_label = f" '%{block_name}'" if block_name else ""
         return CodeAction(
             title=f"Add 'end' to close{block_label} block",
+            kind=CodeActionKind.QuickFix,
+            diagnostics=[diagnostic],
+            edit=WorkspaceEdit(
+                changes={
+                    "document": [
+                        TextEdit(
+                            range=Range(start=insert_pos, end=insert_pos),
+                            new_text=new_text,
+                        )
+                    ]
+                }
+            ),
+        )
+
+    def _fix_missing_coord_terminator(
+        self,
+        source: str,
+        diagnostic: Diagnostic,
+    ) -> Optional[CodeAction]:
+        """Append a closing '*' line to terminate a coordinate block."""
+        lines = source.split("\n")
+        insert_line = len(lines)
+        while insert_line > 0 and not lines[insert_line - 1].strip():
+            insert_line -= 1
+        insert_pos = Position(line=insert_line, character=0)
+        new_text = "*\n" if insert_line < len(lines) else "\n*\n"
+        return CodeAction(
+            title="Add '*' to terminate coordinate block",
             kind=CodeActionKind.QuickFix,
             diagnostics=[diagnostic],
             edit=WorkspaceEdit(

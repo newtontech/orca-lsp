@@ -22,7 +22,21 @@ def _file_type(path: Path) -> str:
     return name.lower()
 
 
+def _is_log_file(path: Path) -> bool:
+    suffix = path.suffix.lower()
+    return suffix in {".log", ".out"}
+
+
+def _collect_log_diagnostics(path: Path) -> list[Any]:
+    from .features.test_runner import log_diagnostic_to_dict, parse_log
+
+    return [log_diagnostic_to_dict(item) for item in parse_log(path)]
+
+
 def _collect_diagnostics(path: Path) -> list[Any]:
+    if _is_log_file(path):
+        return _collect_log_diagnostics(path)
+
     from .features.diagnostic import DiagnosticProvider
     from .features.lint import LintProvider
     from .features.typecheck import TypecheckProvider
@@ -136,6 +150,8 @@ def check_path(path: Path) -> dict[str, Any]:
             diagnostics: list[Any] = list(preflight)
         else:
             diagnostics = []
+    elif _is_log_file(path):
+        diagnostics = _collect_log_diagnostics(path)
     else:
         diagnostics = _collect_diagnostics(path)
     uri = (path if path.is_dir() else path.resolve()).resolve().as_uri()

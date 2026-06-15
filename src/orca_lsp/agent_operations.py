@@ -14,6 +14,8 @@ from collections.abc import Iterable
 from pathlib import Path
 from typing import Any, Callable
 
+from lsprotocol.types import DiagnosticSeverity, Position, Range
+
 from .rich_diagnostics import agent_check_payload
 
 OPERATIONS = ("check", "context", "complete", "hover", "symbols", "fix")
@@ -114,6 +116,9 @@ def operation_path(
 
     if operation == "fix":
         actions = _fix_actions(payload["diagnostics"], line=line, character=character)
+        preview_actions = _preview_fix_actions(path, text, diagnostics)
+        if preview_actions:
+            actions = preview_actions + actions
         payload["actions"] = actions
         status = "available" if actions else "unavailable"
         reason = (
@@ -389,6 +394,120 @@ def _fix_actions(
                 }
             )
     return actions
+
+
+def _preview_fix_actions(
+    path: Path,
+    text: str,
+    diagnostics: list[Any],
+) -> list[dict[str, Any]]:
+    """Return preview-only quick fixes backed by CodeActionProvider edits."""
+    if path.suffix.lower() not in {".inp", ".input", ".orca"}:
+        return []
+    if not diagnostics:
+        return []
+
+    from lsprotocol.types import Diagnostic as LspDiagnostic
+
+    from .features.code_actions import CodeActionProvider
+
+    provider = CodeActionProvider()
+    lsp_diagnostics: list[LspDiagnostic] = []
+    for item in diagnostics:
+        if isinstance(item, LspDiagnostic):
+            lsp_diagnostics.append(item)
+            continue
+        if not isinstance(item, dict):
+            continue
+        rng = item.get("range", {})
+        start = rng.get("start", {})
+        end = rng.get("end", {})
+        lsp_diagnostics.append(
+            LspDiagnostic(
+                range=Range(
+                    start=Position(
+                        line=int(start.get("line", 0) or 0),
+                        character=int(start.get("character", 0) or 0),
+                    ),
+                    end=Position(
+                        line=int(end.get("line", 0) or 0),
+                        character=int(end.get("character", 1) or 1),
+                    ),
+                ),
+                message=str(item.get("message", "")),
+                severity=DiagnosticSeverity.Error,
+                source=str(item.get("source", "orca-lsp")),
+                code=str(item.get("code", "")),
+            )
+        )
+
+    actions: list[dict[str, Any]] = []
+    for action in provider.get_code_actions(text, lsp_diagnostics):
+        preview = _code_action_to_preview(action)
+        if preview is not None:
+            actions.append(preview)
+    return actions
+
+
+def _code_action_to_preview(action: Any) -> dict[str, Any] | None:
+    edit_payload: dict[str, Any] | None = None
+    workspace_edit = getattr(action, "edit", None)
+    if workspace_edit is not None:
+        changes = getattr(workspace_edit, "changes", None)
+        if isinstance(changes, dict):
+            serialized_changes: dict[str, list[dict[str, Any]]] = {}
+            for uri, edits in changes.items():
+                serialized_changes[str(uri)] = [
+                    {
+                        "range": {
+                            "start": {
+                                "line": edit.range.start.line,
+                                "character": edit.range.start.character,
+                            },
+                            "end": {
+                                "line": edit.range.end.line,
+                                "character": edit.range.end.character,
+                            },
+                        },
+                        "newText": edit.new_text,
+                    }
+                    for edit in edits
+                ]
+            edit_payload = {"changes": serialized_changes}
+
+    diagnostic_code = None
+    diagnostic_range = None
+    diagnostics = getattr(action, "diagnostics", None) or []
+    if diagnostics:
+        first = diagnostics[0]
+        diagnostic_code = getattr(first, "code", None)
+        diag_range = getattr(first, "range", None)
+        if diag_range is not None:
+            diagnostic_range = {
+                "start": {
+                    "line": diag_range.start.line,
+                    "character": diag_range.start.character,
+                },
+                "end": {
+                    "line": diag_range.end.line,
+                    "character": diag_range.end.character,
+                },
+            }
+
+    kind = getattr(action, "kind", None)
+    kind_value = getattr(kind, "value", kind) if kind is not None else "quickfix"
+    return {
+        "title": str(getattr(action, "title", "Apply quick fix")),
+        "kind": str(kind_value),
+        "diagnostic_code": diagnostic_code,
+        "diagnostic_range": diagnostic_range,
+        "confidence": 1.0,
+        "blocking": False,
+        "safe_to_auto_apply": False,
+        "preview_only": True,
+        "edit": edit_payload,
+        "data": {"source": "code-actions"},
+    }
 
 
 def _import_optional(module_name: str) -> Any | None:

@@ -55,9 +55,23 @@ _LOG_SOURCE = "orca-log-parser"
 
 # Patterns matched against ORCA log/output files.
 # Each entry is (compiled_regex, rule_code, human_message_template).
+_LOG_SOURCE_PROVENANCE: dict[str, Any] = {
+    "id": "orca-official-docs",
+    "name": "ORCA Official Documentation",
+    "url": "https://www.faccts.de/docs/orca/",
+    "type": "official_docs",
+    "version": "5.0.x",
+    "schema_source": "raw/assets/orca-output-format.md",
+}
+
 _LOG_PATTERNS: list[tuple[re.Pattern[str], str, str]] = [
     (
         re.compile(r"SCF NOT CONVERGED", re.IGNORECASE),
+        RULE_LOG_SCF_NOT_CONVERGED,
+        "SCF convergence failure detected in ORCA output",
+    ),
+    (
+        re.compile(r"SCF convergence failed", re.IGNORECASE),
         RULE_LOG_SCF_NOT_CONVERGED,
         "SCF convergence failure detected in ORCA output",
     ),
@@ -92,6 +106,39 @@ _LOG_PATTERNS: list[tuple[re.Pattern[str], str, str]] = [
         "Memory allocation failed during ORCA execution",
     ),
 ]
+
+
+def log_diagnostic_to_dict(diagnostic: Diagnostic) -> dict[str, Any]:
+    """Serialize a log diagnostic with official source provenance."""
+    rule_code = str(diagnostic.code or "")
+    provenance = dict(_LOG_SOURCE_PROVENANCE)
+    if rule_code == RULE_LOG_SCF_NOT_CONVERGED:
+        provenance["section"] = "SCF convergence troubleshooting"
+        provenance["manual_ref"] = "Increase MaxIter or change SCF convergence strategy"
+    else:
+        provenance["section"] = "Input/output error handling"
+    return {
+        "code": rule_code,
+        "message": diagnostic.message,
+        "severity": int(diagnostic.severity or DiagnosticSeverity.Error),
+        "source": diagnostic.source,
+        "range": {
+            "start": {
+                "line": diagnostic.range.start.line,
+                "character": diagnostic.range.start.character,
+            },
+            "end": {
+                "line": diagnostic.range.end.line,
+                "character": diagnostic.range.end.character,
+            },
+        },
+        "category": "preflight/runtime-risk",
+        "blocking": True,
+        "source_provenance": provenance,
+        "fix_hints": [
+            "Review the referenced input section and ORCA manual guidance before rerunning."
+        ],
+    }
 
 
 def parse_log(path_or_text: str | Path) -> list[Diagnostic]:
