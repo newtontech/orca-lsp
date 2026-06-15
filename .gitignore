@@ -42,3 +42,7 @@ htmlcov/
 .dmypy.json
 dmypy.json
 .worktrees/
+
+# UV
+uv.lock
+.venv/
