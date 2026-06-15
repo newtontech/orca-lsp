@@ -135,6 +135,20 @@ def _collect_preflight(
     return diagnostics, graph.to_json(), version_assumption
 
 
+def parse_log_path(path: Path) -> dict[str, Any]:
+    """Return DiagnosticEnvelope/v1 payload for ORCA log/output runtime errors."""
+    diagnostics = _collect_log_diagnostics(path)
+    uri = path.resolve().as_uri()
+    return agent_check_payload(
+        software=SOFTWARE,
+        uri=uri,
+        operation="parse-log",
+        diagnostics=diagnostics,
+        path=str(path),
+        file_type=_file_type(path),
+    )
+
+
 def check_path(path: Path) -> dict[str, Any]:
     intent = _load_intent(path)
     artifacts: list[dict[str, Any]] = []
@@ -238,6 +252,7 @@ def main(argv: list[str] | None = None) -> int:
     subparsers = parser.add_subparsers(dest="operation", required=True)
     for operation in (
         "check",
+        "parse-log",
         "preflight",
         "manifest",
         "context",
@@ -269,13 +284,17 @@ def main(argv: list[str] | None = None) -> int:
             default=0,
             help="0-based character for position-aware operations.",
         )
-        if operation == "check":
+        if operation in {"check", "parse-log"}:
             sub.add_argument("--fail-on-blocking", action="store_true")
         if operation == "preflight":
             sub.add_argument("--fail-on-blocking", action="store_true")
     args = parser.parse_args(argv)
     if args.operation == "check":
         payload = with_capabilities(check_path(args.path), "check")
+        print(json.dumps(payload, indent=2, sort_keys=True))
+        return 1 if getattr(args, "fail_on_blocking", False) and not payload["ok"] else 0
+    if args.operation == "parse-log":
+        payload = with_capabilities(parse_log_path(args.path), "parse-log")
         print(json.dumps(payload, indent=2, sort_keys=True))
         return 1 if getattr(args, "fail_on_blocking", False) and not payload["ok"] else 0
     if args.operation == "preflight":

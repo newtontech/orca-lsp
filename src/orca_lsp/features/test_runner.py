@@ -50,6 +50,7 @@ _LINE_NUM_RE = re.compile(r"line\s+(\d+)", re.IGNORECASE)
 
 RULE_LOG_SCF_NOT_CONVERGED = "ORCA-E024"
 RULE_LOG_INPUT_PARSE_ERROR = "ORCA-E025"
+RULE_LOG_BASIS_NOT_FOUND = "ORCA-E026"
 
 _LOG_SOURCE = "orca-log-parser"
 
@@ -96,6 +97,21 @@ _LOG_PATTERNS: list[tuple[re.Pattern[str], str, str]] = [
         "ORCA finished by error",
     ),
     (
+        re.compile(r"ORCA finished by error termination", re.IGNORECASE),
+        RULE_LOG_INPUT_PARSE_ERROR,
+        "ORCA finished by error termination",
+    ),
+    (
+        re.compile(r"Basis set .+ not found", re.IGNORECASE),
+        RULE_LOG_BASIS_NOT_FOUND,
+        "Basis set not found in ORCA basis library",
+    ),
+    (
+        re.compile(r"could not find basis set", re.IGNORECASE),
+        RULE_LOG_BASIS_NOT_FOUND,
+        "Basis set not found in ORCA basis library",
+    ),
+    (
         re.compile(r"Segmentation fault", re.IGNORECASE),
         RULE_LOG_INPUT_PARSE_ERROR,
         "Segmentation fault during ORCA execution",
@@ -115,6 +131,10 @@ def log_diagnostic_to_dict(diagnostic: Diagnostic) -> dict[str, Any]:
     if rule_code == RULE_LOG_SCF_NOT_CONVERGED:
         provenance["section"] = "SCF convergence troubleshooting"
         provenance["manual_ref"] = "Increase MaxIter or change SCF convergence strategy"
+    elif rule_code == RULE_LOG_BASIS_NOT_FOUND:
+        provenance["section"] = "Basis set selection"
+        provenance["manual_ref"] = "raw/assets/orca-basis-sets-reference.md"
+        provenance["schema_source"] = "raw/assets/orca-basis-sets-reference.md"
     else:
         provenance["section"] = "Input/output error handling"
     return {

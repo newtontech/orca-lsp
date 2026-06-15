@@ -28,6 +28,9 @@ ORCA-E020     Malformed %pal block (missing or invalid nprocs)  Error
 ORCA-E021     Missing charge/multiplicity in * xyz header        Error
 ORCA-E022     Coordinate block not terminated with * or end      Error
 ORCA-E023     Key block missing proper end terminator            Error
+ORCA-E027     Malformed %maxcore (non-numeric memory value)       Error
+ORCA-E028     Heavy element missing ECP assignment                Error
+ORCA-W021     RI method missing auxiliary basis set               Warning
 ============  =================================================  ==========
 """
 
@@ -73,6 +76,65 @@ RULE_MALFORMED_PAL = "ORCA-E020"
 RULE_MISSING_XYZ_HEADER = "ORCA-E021"
 RULE_MISSING_COORD_TERMINATOR = "ORCA-E022"
 RULE_INVALID_BLOCK_TERMINATOR = "ORCA-E023"
+RULE_MALFORMED_MAXCORE = "ORCA-E027"
+RULE_MISSING_ECP = "ORCA-E028"
+RULE_RI_MISSING_AUX_BASIS = "ORCA-W021"
+
+# Elements with Z >= 37 typically require an ECP when using def2/cc orbital bases.
+_HEAVY_ELEMENT_Z: Dict[str, int] = {
+    "Rb": 37,
+    "Sr": 38,
+    "Y": 39,
+    "Zr": 40,
+    "Nb": 41,
+    "Mo": 42,
+    "Tc": 43,
+    "Ru": 44,
+    "Rh": 45,
+    "Pd": 46,
+    "Ag": 47,
+    "Cd": 48,
+    "In": 49,
+    "Sn": 50,
+    "Sb": 51,
+    "Te": 52,
+    "I": 53,
+    "Xe": 54,
+    "Cs": 55,
+    "Ba": 56,
+    "La": 57,
+    "Ce": 58,
+    "Pr": 59,
+    "Nd": 60,
+    "Pm": 61,
+    "Sm": 62,
+    "Eu": 63,
+    "Gd": 64,
+    "Tb": 65,
+    "Dy": 66,
+    "Ho": 67,
+    "Er": 68,
+    "Tm": 69,
+    "Yb": 70,
+    "Lu": 71,
+    "Hf": 72,
+    "Ta": 73,
+    "W": 74,
+    "Re": 75,
+    "Os": 76,
+    "Ir": 77,
+    "Pt": 78,
+    "Au": 79,
+    "Hg": 80,
+    "Tl": 81,
+    "Pb": 82,
+    "Bi": 83,
+    "Po": 84,
+    "At": 85,
+    "Rn": 86,
+}
+
+_RI_METHOD_TOKENS = frozenset({"RI-MP2", "RIJCOSX", "RI-J", "RIJONX"})
 
 # Known tokens that are not in ALL_KEYWORDS but are valid ORCA simple-input
 # keywords (modifiers, convergence settings, solvent models, etc.).
@@ -177,6 +239,9 @@ class LintProvider:
         self._check_xyz_header(lines, diagnostics)
         self._check_coord_terminator(lines, diagnostics)
         self._check_block_terminator(lines, diagnostics)
+        self._check_malformed_maxcore(lines, diagnostics)
+        self._check_missing_ecp(result, lines, diagnostics)
+        self._check_ri_aux_basis(result, lines, diagnostics)
 
         return diagnostics
 
@@ -412,6 +477,9 @@ class LintProvider:
             if len(parts) == 2:
                 value = parts[1]
                 if value.isdigit() or (value.startswith('"') and value.endswith('"')):
+                    i += 1
+                    continue
+                if block_name == "maxcore":
                     i += 1
                     continue
 
@@ -894,6 +962,9 @@ class LintProvider:
                 if value.isdigit() or (value.startswith('"') and value.endswith('"')):
                     i += 1
                     continue
+                if block_name == "maxcore":
+                    i += 1
+                    continue
 
             # Multi-line block: scan for "end"
             found_end = False
@@ -929,6 +1000,166 @@ class LintProvider:
                 )
 
             i = j + 1 if found_end else i + 1
+
+    # ------------------------------------------------------------------
+    # Malformed %maxcore (ORCA-E027)
+    # ------------------------------------------------------------------
+
+    def _check_malformed_maxcore(
+        self,
+        lines: List[str],
+        diagnostics: List[Diagnostic],
+    ) -> None:
+        """Check that ``%maxcore`` lines contain a positive integer memory value."""
+        _maxcore_re = re.compile(r"^\s*%maxcore\s+(\S+)", re.IGNORECASE)
+        for i, line in enumerate(lines):
+            match = _maxcore_re.match(line)
+            if not match:
+                continue
+            raw_value = match.group(1)
+            try:
+                memory = int(raw_value)
+            except ValueError:
+                col = line.lower().find("maxcore")
+                if col < 0:
+                    col = 0
+                val_col = line.find(raw_value, col)
+                if val_col < 0:
+                    val_col = col
+                diagnostics.append(
+                    Diagnostic(
+                        range=Range(
+                            start=Position(line=i, character=val_col),
+                            end=Position(line=i, character=val_col + len(raw_value)),
+                        ),
+                        message=(
+                            f"%maxcore value '{raw_value}' is not a valid integer (MB per core)"
+                        ),
+                        severity=DiagnosticSeverity.Error,
+                        source="orca-lsp-lint",
+                        code=RULE_MALFORMED_MAXCORE,
+                    )
+                )
+                continue
+            if memory < 1:
+                val_col = line.find(raw_value)
+                if val_col < 0:
+                    val_col = 0
+                diagnostics.append(
+                    Diagnostic(
+                        range=Range(
+                            start=Position(line=i, character=val_col),
+                            end=Position(line=i, character=val_col + len(raw_value)),
+                        ),
+                        message=f"%maxcore must be a positive integer, got {memory}",
+                        severity=DiagnosticSeverity.Error,
+                        source="orca-lsp-lint",
+                        code=RULE_MALFORMED_MAXCORE,
+                    )
+                )
+
+    # ------------------------------------------------------------------
+    # Missing ECP for heavy elements (ORCA-E028)
+    # ------------------------------------------------------------------
+
+    def _check_missing_ecp(
+        self,
+        result: ParseResult,
+        lines: List[str],
+        diagnostics: List[Diagnostic],
+    ) -> None:
+        """Warn when heavy elements lack an ECP assignment in %basis."""
+        if result.geometry is None:
+            return
+
+        route_has_ecp_basis = False
+        if result.simple_input is not None:
+            route_has_ecp_basis = any(
+                "ECP" in basis.upper() for basis in result.simple_input.basis_sets
+            )
+        basis_blocks = [b for b in result.percent_blocks if b.name.lower() == "basis"]
+        basis_text = "\n".join(b.raw_content for b in basis_blocks).upper()
+
+        for atom in result.geometry.atoms:
+            if atom.element not in _HEAVY_ELEMENT_Z:
+                continue
+            if route_has_ecp_basis:
+                continue
+            ecp_pattern = re.compile(
+                rf"\bECP\s+{re.escape(atom.element)}\b",
+                re.IGNORECASE,
+            )
+            if ecp_pattern.search(basis_text):
+                continue
+
+            line_idx = atom.line_number
+            col = 0
+            if line_idx < len(lines):
+                col = lines[line_idx].find(atom.element)
+                if col < 0:
+                    col = 0
+            diagnostics.append(
+                Diagnostic(
+                    range=Range(
+                        start=Position(line=line_idx, character=col),
+                        end=Position(line=line_idx, character=col + len(atom.element)),
+                    ),
+                    message=(
+                        f"Heavy element {atom.element} requires an ECP "
+                        f"(add '%basis' ECP {atom.element} \"def2-ECP\" end)"
+                    ),
+                    severity=DiagnosticSeverity.Error,
+                    source="orca-lsp-lint",
+                    code=RULE_MISSING_ECP,
+                )
+            )
+
+    # ------------------------------------------------------------------
+    # RI method missing auxiliary basis (ORCA-W021)
+    # ------------------------------------------------------------------
+
+    def _check_ri_aux_basis(
+        self,
+        result: ParseResult,
+        lines: List[str],
+        diagnostics: List[Diagnostic],
+    ) -> None:
+        """Warn when an RI method is used without an auxiliary (/C) basis set."""
+        if result.simple_input is None:
+            return
+
+        si = result.simple_input
+        route_tokens = [m.upper() for m in si.methods] + [k.upper() for k in si.other_keywords]
+        uses_ri = any(token in _RI_METHOD_TOKENS for token in route_tokens)
+        if not uses_ri:
+            return
+
+        has_aux_basis = any("/" in basis for basis in si.basis_sets)
+        if has_aux_basis:
+            return
+
+        line_idx = si.line_number
+        if line_idx >= len(lines):
+            return
+        raw_line = lines[line_idx]
+        col = raw_line.find("!")
+        if col < 0:
+            col = 0
+        diagnostics.append(
+            Diagnostic(
+                range=Range(
+                    start=Position(line=line_idx, character=col),
+                    end=Position(line=line_idx, character=len(raw_line.rstrip())),
+                ),
+                message=(
+                    "RI method specified without auxiliary basis set "
+                    "(e.g. def2-TZVP/C for RI-MP2)"
+                ),
+                severity=DiagnosticSeverity.Warning,
+                source="orca-lsp-lint",
+                code=RULE_RI_MISSING_AUX_BASIS,
+            )
+        )
 
     # ------------------------------------------------------------------
     # Snapshot helpers

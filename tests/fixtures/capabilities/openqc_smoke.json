@@ -1,5 +1,5 @@
 {
-  "expected_rule_count": 19,
+  "expected_rule_count": 23,
   "smoke_checks": [
     "rule_manifest",
     "lint_engine_valid",
@@ -7,5 +7,5 @@
     "validate_input",
     "agent_api_snapshot"
   ],
-  "log_rule_codes": ["ORCA-E024", "ORCA-E025"]
+  "log_rule_codes": ["ORCA-E024", "ORCA-E025", "ORCA-E026"]
 }

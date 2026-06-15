@@ -1,0 +1,8 @@
+! B3LYP def2-TZVP TightSCF
+%maxcore 4000
+%pal nprocs 4 end
+
+* xyz 0 1
+Pt  0.0  0.0  0.0
+H   1.5  0.0  0.0
+*

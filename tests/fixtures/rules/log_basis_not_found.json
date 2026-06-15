@@ -1,0 +1,13 @@
+[
+  {
+    "code": "ORCA-E026",
+    "message": "Basis set not found in ORCA basis library",
+    "range": {
+      "start": { "line": 4, "character": 0 },
+      "end": { "line": 4, "character": 39 }
+    },
+    "severity": 1,
+    "severity_label": "error",
+    "source": "orca-log-parser"
+  }
+]

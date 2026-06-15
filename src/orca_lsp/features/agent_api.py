@@ -1109,7 +1109,7 @@ class AgentAPIProvider:
                 ),
                 "available": True,
                 "requires_binary": False,
-                "rule_codes": ["ORCA-E024", "ORCA-E025"],
+                "rule_codes": ["ORCA-E024", "ORCA-E025", "ORCA-E026"],
             },
         }
 
@@ -1132,19 +1132,23 @@ class AgentAPIProvider:
             RULE_INVALID_BLOCK_TERMINATOR,
             RULE_INVALID_CHARGE,
             RULE_INVALID_MULTIPLICITY,
+            RULE_MALFORMED_MAXCORE,
             RULE_MALFORMED_PAL,
             RULE_MAXITER_RANGE,
             RULE_MISSING_COORD_TERMINATOR,
+            RULE_MISSING_ECP,
             RULE_MISSING_MAXCORE,
             RULE_MISSING_METHOD_BASIS,
             RULE_MISSING_XYZ_HEADER,
             RULE_NONSTANDARD_TOKEN,
             RULE_NPROCS_HIGH,
+            RULE_RI_MISSING_AUX_BASIS,
             RULE_UNCLOSED_BLOCK,
             RULE_UNKNOWN_BLOCK,
             RULE_UNKNOWN_TOKEN,
         )
         from ..features.test_runner import (
+            RULE_LOG_BASIS_NOT_FOUND,
             RULE_LOG_INPUT_PARSE_ERROR,
             RULE_LOG_SCF_NOT_CONVERGED,
         )
@@ -1221,6 +1225,21 @@ class AgentAPIProvider:
                 "description": "Malformed %pal block (missing or invalid nprocs)",
             },
             {
+                "code": RULE_MALFORMED_MAXCORE,
+                "severity": "error",
+                "description": "Malformed %maxcore block (non-numeric memory value)",
+            },
+            {
+                "code": RULE_MISSING_ECP,
+                "severity": "error",
+                "description": "Heavy element missing ECP assignment in %basis",
+            },
+            {
+                "code": RULE_RI_MISSING_AUX_BASIS,
+                "severity": "warning",
+                "description": "RI method missing auxiliary (/C) basis set",
+            },
+            {
                 "code": RULE_MISSING_XYZ_HEADER,
                 "severity": "error",
                 "description": "Missing charge/multiplicity in * xyz header",
@@ -1244,6 +1263,11 @@ class AgentAPIProvider:
                 "code": RULE_LOG_INPUT_PARSE_ERROR,
                 "severity": "error",
                 "description": "Input parse or runtime error in ORCA output",
+            },
+            {
+                "code": RULE_LOG_BASIS_NOT_FOUND,
+                "severity": "error",
+                "description": "Basis set not found in ORCA output",
             },
         ]
         return rules
