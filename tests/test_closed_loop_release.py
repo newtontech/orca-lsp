@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 from orca_lsp.agent_operations import operation_path
@@ -75,6 +76,13 @@ class TestReleaseProvenance:
         capabilities = json.loads(Path("lsp-capabilities.json").read_text(encoding="utf-8"))
         assert version_text == capabilities["version"]
         assert capabilities["release_provenance"]["version_file"] == "VERSION"
+
+    def test_pyproject_version_matches_version_file(self) -> None:
+        version_text = Path("VERSION").read_text(encoding="utf-8").strip()
+        pyproject_text = Path("pyproject.toml").read_text(encoding="utf-8")
+        match = re.search(r'^version\s*=\s*"([^"]+)"', pyproject_text, re.MULTILINE)
+        assert match is not None, "Expected project.version in pyproject.toml"
+        assert match.group(1) == version_text
 
     def test_capabilities_fixture_matches_repo_manifest(self) -> None:
         repo = json.loads(Path("lsp-capabilities.json").read_text(encoding="utf-8"))
