@@ -1,0 +1,11 @@
+ORCA 5.0.4: Geometry Optimization
+===================
+
+...
+
+The geometry optimization did not converge!
+The maximum number of optimization cycles (50) has been reached.
+Consider:
+1. Check the initial geometry
+2. Use a better optimization algorithm (e.g., L-BFGS)
+3. Increase the maximum number of cycles

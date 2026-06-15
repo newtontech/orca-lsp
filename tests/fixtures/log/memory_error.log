@@ -1,0 +1,9 @@
+ORCA 5.0.4: Single Point Calculation
+===================
+
+...
+
+Error: Not enough memory!
+       Requested:  100000 MB
+       Available:   50000 MB
+       Please increase %maxcore or reduce the basis set size.

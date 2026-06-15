@@ -1,0 +1,8 @@
+ORCA 5.0.4: Single Point Calculation
+===================
+
+...
+
+Error: Basis set 'def3-TZVP' not found!
+       Available basis sets: def2-SVP, def2-TZVP, def2-QZVP, def2-SVPD, def2-TZVPD, ...
+       Please check the basis set name.

@@ -1,0 +1,6 @@
+! B3LYP def2-TZVP TightSCF RIJCOSX RI-J
+
+* xyz 0 1
+H  0.0  0.0  0.0
+H  0.0  0.0  0.74
+*
