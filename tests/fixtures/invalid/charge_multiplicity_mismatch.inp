@@ -1,0 +1,6 @@
+! B3LYP def2-TZVP TightSCF
+
+* xyz 0 2
+H  0.0  0.0  0.0
+H  0.0  0.0  0.74
+*

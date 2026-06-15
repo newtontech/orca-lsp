@@ -39,8 +39,11 @@ from ..parser import ORCAParser
 from .lint import (
     RULE_DUPLICATE_BLOCK,
     RULE_DUPLICATE_TOKEN,
+    RULE_MALFORMED_MAXCORE,
+    RULE_MALFORMED_PAL,
     RULE_MISSING_COORD_TERMINATOR,
     RULE_MISSING_MAXCORE,
+    RULE_MISSING_METHOD_BASIS,
     RULE_UNCLOSED_BLOCK,
     RULE_UNKNOWN_BLOCK,
     RULE_UNKNOWN_TOKEN,
@@ -196,6 +199,9 @@ class CodeActionProvider:
             RULE_DUPLICATE_BLOCK: self._fix_duplicate_block,
             RULE_MISSING_MAXCORE: self._fix_missing_maxcore,
             RULE_DUPLICATE_TOKEN: self._fix_duplicate_token,
+            RULE_MISSING_METHOD_BASIS: self._fix_missing_method_basis,
+            RULE_MALFORMED_PAL: self._fix_malformed_pal,
+            RULE_MALFORMED_MAXCORE: self._fix_malformed_maxcore,
             _RULE_MISSING_SECTION: self._fix_missing_section,
         }.get(rule_code)
 
@@ -474,6 +480,99 @@ class CodeActionProvider:
                                 end=Position(line=line_num, character=col_end),
                             ),
                             new_text="",
+                        )
+                    ]
+                }
+            ),
+        )
+
+    def _fix_missing_method_basis(
+        self,
+        source: str,
+        diagnostic: Diagnostic,
+    ) -> Optional[CodeAction]:
+        """Append a default basis set when the route line is missing one."""
+        message = diagnostic.message.lower()
+        if "basis" not in message:
+            return None
+
+        lines = source.split("\n")
+        line_num = diagnostic.range.start.line
+        if line_num >= len(lines):
+            return None
+
+        line = lines[line_num].rstrip()
+        insert_pos = Position(line=line_num, character=len(line))
+        return CodeAction(
+            title="Append basis set 'def2-SVP' to route line",
+            kind=CodeActionKind.QuickFix,
+            diagnostics=[diagnostic],
+            edit=WorkspaceEdit(
+                changes={
+                    "document": [
+                        TextEdit(
+                            range=Range(start=insert_pos, end=insert_pos),
+                            new_text=" def2-SVP",
+                        )
+                    ]
+                }
+            ),
+        )
+
+    def _fix_malformed_pal(
+        self,
+        source: str,
+        diagnostic: Diagnostic,
+    ) -> Optional[CodeAction]:
+        """Insert a default nprocs line into a malformed %pal block."""
+        lines = source.split("\n")
+        block_start = diagnostic.range.start.line
+        insert_line = block_start + 1
+        while insert_line < len(lines) and lines[insert_line].strip().lower() == "end":
+            break
+        insert_pos = Position(line=insert_line, character=0)
+        return CodeAction(
+            title="Add 'nprocs 4' to %pal block",
+            kind=CodeActionKind.QuickFix,
+            diagnostics=[diagnostic],
+            edit=WorkspaceEdit(
+                changes={
+                    "document": [
+                        TextEdit(
+                            range=Range(start=insert_pos, end=insert_pos),
+                            new_text="  nprocs 4\n",
+                        )
+                    ]
+                }
+            ),
+        )
+
+    def _fix_malformed_maxcore(
+        self,
+        source: str,
+        diagnostic: Diagnostic,
+    ) -> Optional[CodeAction]:
+        """Replace a non-numeric %maxcore value with the recommended default."""
+        diag_range = diagnostic.range
+        return CodeAction(
+            title=f"Replace %maxcore value with '{_DEFAULT_MAXCORE}'",
+            kind=CodeActionKind.QuickFix,
+            diagnostics=[diagnostic],
+            edit=WorkspaceEdit(
+                changes={
+                    "document": [
+                        TextEdit(
+                            range=Range(
+                                start=Position(
+                                    line=diag_range.start.line,
+                                    character=diag_range.start.character,
+                                ),
+                                end=Position(
+                                    line=diag_range.end.line,
+                                    character=diag_range.end.character,
+                                ),
+                            ),
+                            new_text=str(_DEFAULT_MAXCORE),
                         )
                     ]
                 }

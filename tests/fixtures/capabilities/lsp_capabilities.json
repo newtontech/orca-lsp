@@ -1,6 +1,6 @@
 {
   "name": "orca-lsp",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "description": "Language Server Protocol for ORCA quantum chemistry software",
   "diagnostic_engine": "1.0",
   "release_provenance": {
@@ -50,7 +50,7 @@
     }
   ],
   "capabilities": {
-    "operations": ["check", "context", "complete", "hover", "symbols", "fix"],
+    "operations": ["check", "parse-log", "context", "complete", "hover", "symbols", "fix"],
     "diagnostic_categories": [
       "syntax",
       "schema",
@@ -63,7 +63,7 @@
     "file_types": ["inp", "input", "orca", "log", "out"],
     "rule_manifest": {
       "path": "tests/fixtures/capabilities/openqc_smoke.json",
-      "expected_rule_count": 19
+      "expected_rule_count": 23
     }
   },
   "openqc_compatibility": {
@@ -74,6 +74,6 @@
       "validate_input",
       "agent_api_snapshot"
     ],
-    "log_rule_codes": ["ORCA-E024", "ORCA-E025"]
+    "log_rule_codes": ["ORCA-E024", "ORCA-E025", "ORCA-E026"]
   }
 }

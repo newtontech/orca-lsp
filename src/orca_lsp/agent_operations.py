@@ -18,7 +18,7 @@ from lsprotocol.types import DiagnosticSeverity, Position, Range
 
 from .rich_diagnostics import agent_check_payload
 
-OPERATIONS = ("check", "context", "complete", "hover", "symbols", "fix")
+OPERATIONS = ("check", "parse-log", "context", "complete", "hover", "symbols", "fix")
 _WORD_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_.$%+-]*")
 _SECTION_RE = re.compile(r"^\s*(?:&(?P<section>[A-Za-z][A-Za-z0-9_.$-]*)|\[(?P<bracket>[^\]]+)\])")
 _ASSIGNMENT_RE = re.compile(r"^\s*(?P<key>[A-Za-z_][A-Za-z0-9_.$%-]*)\s*(?:=|:|\s+)")
@@ -119,6 +119,11 @@ def operation_path(
         preview_actions = _preview_fix_actions(path, text, diagnostics)
         if preview_actions:
             actions = preview_actions + actions
+        refusal_actions = _refusal_actions(payload["diagnostics"])
+        preview_codes = {str(a.get("diagnostic_code")) for a in preview_actions}
+        for refusal in refusal_actions:
+            if refusal["diagnostic_code"] not in preview_codes:
+                actions.append(refusal)
         payload["actions"] = actions
         status = "available" if actions else "unavailable"
         reason = (
@@ -368,6 +373,61 @@ def _diagnostic_hover(diagnostics: list[dict[str, Any]], line: int, character: i
     if manual_ref:
         parts.append(f"Manual: {manual_ref}")
     return "\n".join(parts)
+
+
+_FIX_REFUSALS: dict[str, str] = {
+    "ORCA-E007": (
+        "Charge/multiplicity fixes require physical reasoning; "
+        "adjust multiplicity manually after counting electrons."
+    ),
+    "ORCA-E028": (
+        "ECP assignments are element-specific; add a %basis ECP block manually "
+        "(see orca-basis-sets-reference.md)."
+    ),
+    "ORCA-E024": (
+        "SCF convergence requires input tuning (MaxIter, Guess, level shift); "
+        "review ORCA manual before rerunning."
+    ),
+    "ORCA-E025": (
+        "Runtime errors must be diagnosed from the log context before rerunning."
+    ),
+    "ORCA-E026": (
+        "Basis set errors require selecting a valid basis from the ORCA library."
+    ),
+    "ORCA-W021": (
+        "Auxiliary basis choice depends on the orbital basis; append the matching /C basis manually."
+    ),
+}
+
+
+def _refusal_actions(diagnostics: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Return explicit refusal entries for diagnostics that cannot be auto-fixed."""
+    actions: list[dict[str, Any]] = []
+    seen_codes: set[str] = set()
+    for diagnostic in diagnostics:
+        code = str(diagnostic.get("code") or "")
+        if not code or code in seen_codes:
+            continue
+        reason = _FIX_REFUSALS.get(code)
+        if reason is None:
+            continue
+        seen_codes.add(code)
+        actions.append(
+            {
+                "title": reason,
+                "kind": "refusal",
+                "diagnostic_code": code,
+                "diagnostic_range": diagnostic.get("range"),
+                "confidence": 1.0,
+                "blocking": bool(diagnostic.get("blocking", False)),
+                "safe_to_auto_apply": False,
+                "preview_only": False,
+                "refusal_reason": reason,
+                "edit": None,
+                "data": {"source": "agent-refusal"},
+            }
+        )
+    return actions
 
 
 def _fix_actions(
