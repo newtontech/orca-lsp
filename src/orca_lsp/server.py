@@ -1,6 +1,8 @@
 """ORCA Language Server Protocol implementation"""
 
+import argparse
 import re
+import sys
 from typing import TYPE_CHECKING, List, Optional
 
 from lsprotocol.types import (
@@ -38,11 +40,7 @@ from .features.code_actions import CodeActionProvider
 from .features.diagnostic import DiagnosticProvider
 from .features.formatting import FormattingProvider
 from .features.lint import LintProvider
-from .features.navigation import (
-    DefinitionProvider,
-    HoverProvider,
-    ReferencesProvider,
-)
+from .features.navigation import DefinitionProvider, HoverProvider, ReferencesProvider
 from .features.rename import RenameProvider
 from .features.typecheck import TypecheckProvider
 from .keywords import (
@@ -428,11 +426,19 @@ class ORCALanguageServer(LanguageServer):
         self._validate_document(params.text_document.uri)
 
 
-def main() -> None:
-    """Main entry point"""
+def main(argv: Optional[List[str]] = None) -> None:
+    """Start the server after parsing explicit programmatic arguments."""
+    parser = argparse.ArgumentParser(description="ORCA Language Server")
+    parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
+    parser.parse_args([] if argv is None else argv)
     server = ORCALanguageServer()
     server.start_io()
 
 
+def cli() -> None:
+    """Console entry point that parses command-line arguments."""
+    main(sys.argv[1:])
+
+
 if __name__ == "__main__":
-    main()
+    cli()

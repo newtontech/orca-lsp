@@ -68,6 +68,25 @@ pip install -e ".[dev]"
 pytest
 ```
 
+### Release verification
+
+Releases are published from `v*` tag pushes by `.github/workflows/release.yml`.
+The workflow checks that the tag, Python package, `VERSION`, fixture manifest,
+and OpenQC capability manifest agree, then builds the distributions and installs
+the wheel into a new virtual environment. The isolated smoke verifies
+`orca-lsp --help`, installed version metadata, the agent JSON CLI, and valid,
+invalid, and runtime-log fixtures before the OIDC-enabled `pypi` environment can
+publish. No long-lived PyPI token is used.
+
+Maintainers can exercise the same artifact smoke before creating a tag:
+
+```bash
+python -m pip install build
+python -m build
+python scripts/verify_release.py --tag v0.5.6
+python scripts/smoke_test_wheel.py --wheel dist/orca_lsp-0.5.6-py3-none-any.whl
+```
+
 ### Test Coverage
 
 The project maintains **100% test coverage**:

@@ -1,5 +1,14 @@
 # Change Log
 
+## [0.5.6] - 2026-07-16
+
+### Added
+- Tag-only PyPI trusted-publishing workflow using GitHub OIDC and the protected `pypi` environment
+- Fresh-wheel release smoke covering installed version metadata, server help/version, agent CLI, and valid, invalid, and runtime-log fixtures
+
+### Changed
+- Aligned Python, VERSION, fixture, and OpenQC capability metadata for the 0.5.6 release
+
 ## [0.5.5] - 2026-06-15
 
 ### Added

@@ -1,10 +1,9 @@
 """Tests for ORCA LSP server."""
 
-import pytest
 from unittest.mock import MagicMock, patch
-from lsprotocol.types import (
-    Position,
-)
+
+import pytest
+from lsprotocol.types import Position
 
 from orca_lsp.server import ORCALanguageServer, main
 
@@ -186,6 +185,16 @@ class TestMain:
         mock_server_class.return_value = mock_server
         main()
         mock_server.start_io.assert_called_once()
+
+    @patch("orca_lsp.server.ORCALanguageServer")
+    def test_main_help_exits_without_starting_server(self, mock_server_class, capsys):
+        """The console entry point must expose a non-blocking help command."""
+        with pytest.raises(SystemExit) as exc_info:
+            main(["--help"])
+
+        assert exc_info.value.code == 0
+        assert "ORCA Language Server" in capsys.readouterr().out
+        mock_server_class.assert_not_called()
 
 
 class TestParserIntegration:
